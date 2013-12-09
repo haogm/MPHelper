@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Results\MessageItem.cs" />
+    <Compile Include="DTOs\MessageItem.cs" />
     <Compile Include="Results\ModifyContactResult.cs" />
     <Compile Include="MPLoginContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

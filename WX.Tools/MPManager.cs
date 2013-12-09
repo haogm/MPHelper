@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace WX.Tools
@@ -7,12 +8,11 @@ namespace WX.Tools
 	using Hanger.Common;
 	using Hanger.Utility;
 	using Newtonsoft.Json;
-	using System.Threading.Tasks;
 	using WX.Tools.Results;
 	using WX.Tools.Utility;
 
-    public static class MPManager
-    {
+	public static class MPManager
+	{
 		const string MP_LOGIN_URL = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 		const string MP_MODIFYCONTACKS_URL = "https://mp.weixin.qq.com/cgi-bin/modifycontacts";
 		static readonly string _mpAccount = AppSettingHelper.GetStringValue("MPAccount");
@@ -26,8 +26,8 @@ namespace WX.Tools
 			}
 
 			var success = false;
-			var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json", 
-				HttpUtility.UrlEncode(_mpAccount), 
+			var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json",
+				HttpUtility.UrlEncode(_mpAccount),
 				StringHelper.GetMd5(_mpPassword));
 
 			var cookie = new CookieContainer();
@@ -69,7 +69,7 @@ namespace WX.Tools
 				}
 			}
 
-			var url = string.Format("https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&token={0}&lang=zh_CN", 
+			var url = string.Format("https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&token={0}&lang=zh_CN",
 				MPLoginContext.Current.Token);
 
 			var content = await MPRequestUtility.Get(url, MPLoginContext.Current.LoginCookie);
@@ -115,5 +115,5 @@ namespace WX.Tools
 
 			return false;
 		}
-    }
+	}
 }

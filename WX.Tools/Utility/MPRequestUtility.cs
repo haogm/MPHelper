@@ -8,7 +8,7 @@ namespace WX.Tools.Utility
 {
 	using Hanger.Common;
 
-	public class MPRequestUtility
+	internal class MPRequestUtility
 	{
 		public static async Task<string> Post(string url, string postData, CookieContainer cookie, Encoding encoding = null)
 		{
@@ -31,7 +31,6 @@ namespace WX.Tools.Utility
 				request.Method = "POST";
 				request.Referer = "https://mp.weixin.qq.com/";
 				request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
-				
 
 				using (var requestStream = request.GetRequestStream())
 				{
@@ -77,7 +76,6 @@ namespace WX.Tools.Utility
 						return await streamReader.ReadToEndAsync();
 					}
 				}
-
 			}
 			catch (Exception ex)
 			{
