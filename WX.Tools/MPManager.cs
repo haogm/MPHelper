@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -8,6 +10,7 @@ namespace WX.Tools
 	using Hanger.Common;
 	using Hanger.Utility;
 	using Newtonsoft.Json;
+	using WX.Tools.DTOs;
 	using WX.Tools.Results;
 	using WX.Tools.Utility;
 
@@ -15,6 +18,8 @@ namespace WX.Tools
 	{
 		const string MP_LOGIN_URL = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 		const string MP_MODIFYCONTACKS_URL = "https://mp.weixin.qq.com/cgi-bin/modifycontacts";
+		const string MP_ALL_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count={1}&day={1}&token={2}&lang=zh_CN";
+		const string MP_SINGLE_SEND_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&tofakeid={0}&token={1}&lang=zh_CN";
 		static readonly string _mpAccount = AppSettingHelper.GetStringValue("MPAccount");
 		static readonly string _mpPassword = AppSettingHelper.GetStringValue("MPPassword");
 
@@ -57,7 +62,7 @@ namespace WX.Tools
 			return success;
 		}
 
-		public static async Task<string> GetLastedMessages()
+		public static async Task<IList<MessageItem>> GetAllMessageList(int count = 20, int day = 7)
 		{
 			if (MPLoginContext.Current == null)
 			{
@@ -69,16 +74,81 @@ namespace WX.Tools
 				}
 			}
 
-			var url = string.Format("https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count=20&day=7&token={0}&lang=zh_CN",
-				MPLoginContext.Current.Token);
+			if (count < 1 || count > 100)
+			{
+				count = 20;
+			}
 
-			var content = await MPRequestUtility.Get(url, MPLoginContext.Current.LoginCookie);
+			if (day < 0 || day > 7)
+			{
+				day = 7;
+			}
 
-			return content;
+			var url = string.Format(MP_ALL_MESSAGE_LIST_URL_FORMAT,
+				count, day, MPLoginContext.Current.Token);
+
+			var htmlContent = await MPRequestUtility.Get(url, MPLoginContext.Current.LoginCookie);
+
+			if (!string.IsNullOrWhiteSpace(htmlContent))
+			{
+				var regex = new Regex(@"(?<=\({""msg_item"":\[).*(?=\]}\).msg_item)", RegexOptions.IgnoreCase);
+				var match = regex.Match(htmlContent);
+
+				if (match.Groups.Count > 0)
+				{
+					var listJson = string.Format("[{0}]", match.Groups[0].Value);
+
+					try
+					{
+						return listJson.JsonToObject<List<MessageItem>>();
+					}
+					catch (Exception ex)
+					{
+						LocalLoggingService.Exception(ex);
+					}
+				}
+			}
+
+			return null;
 		}
 
-		public static async Task<string> GetFakeIdAsync(string openId)
+		public static async Task<IList<MessageItem>> GetSingleSendMessageList(string fakeId)
 		{
+			if (MPLoginContext.Current == null)
+			{
+				var login = await LoginAsync();
+
+				if (!login)
+				{
+					return null;
+				}
+			}
+
+			var url = string.Format(MP_SINGLE_SEND_MESSAGE_LIST_URL_FORMAT,
+				fakeId, MPLoginContext.Current.Token);
+
+			var htmlContent = await MPRequestUtility.Get(url, MPLoginContext.Current.LoginCookie);
+
+			if (!string.IsNullOrWhiteSpace(htmlContent))
+			{
+				var regex = new Regex(@"(?<=""msg_items"":{""msg_item"":\[).*(?=\]}})", RegexOptions.IgnoreCase);
+				var match = regex.Match(htmlContent);
+
+				if (match.Groups.Count > 0)
+				{
+					var listJson = string.Format("[{0}]", match.Groups[0].Value);
+
+					try
+					{
+						return listJson.JsonToObject<List<MessageItem>>();
+					}
+					catch (Exception ex)
+					{
+						LocalLoggingService.Exception(ex);
+					}
+				}
+			}
+
 			return null;
 		}
 
