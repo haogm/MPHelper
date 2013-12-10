@@ -30,6 +30,11 @@ namespace WX.Tools
 				return true;
 			}
 
+			if (string.IsNullOrWhiteSpace(_mpAccount) || string.IsNullOrWhiteSpace(_mpPassword))
+			{
+				return false;
+			}
+
 			var success = false;
 			var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json",
 				HttpUtility.UrlEncode(_mpAccount),
@@ -62,7 +67,7 @@ namespace WX.Tools
 			return success;
 		}
 
-		public static async Task<IList<MessageItem>> GetAllMessageList(int count = 20, int day = 7)
+		public static async Task<IList<MessageItem>> GetAllMessageListAsync(int count = 20, int day = 7)
 		{
 			if (MPLoginContext.Current == null)
 			{
@@ -112,7 +117,7 @@ namespace WX.Tools
 			return null;
 		}
 
-		public static async Task<IList<MessageItem>> GetSingleSendMessageList(string fakeId)
+		public static async Task<IList<MessageItem>> GetSingleSendMessageListAsync(string fakeId)
 		{
 			if (MPLoginContext.Current == null)
 			{
