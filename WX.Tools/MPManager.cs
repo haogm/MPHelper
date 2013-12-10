@@ -18,7 +18,7 @@ namespace WX.Tools
 	{
 		const string MP_LOGIN_URL = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 		const string MP_MODIFYCONTACKS_URL = "https://mp.weixin.qq.com/cgi-bin/modifycontacts";
-		const string MP_ALL_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count={1}&day={1}&token={2}&lang=zh_CN";
+		const string MP_ALL_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count={0}&day={1}&token={2}&lang=zh_CN";
 		const string MP_SINGLE_SEND_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&tofakeid={0}&token={1}&lang=zh_CN";
 		static readonly string _mpAccount = AppSettingHelper.GetStringValue("MPAccount");
 		static readonly string _mpPassword = AppSettingHelper.GetStringValue("MPPassword");
@@ -36,7 +36,7 @@ namespace WX.Tools
 				StringHelper.GetMd5(_mpPassword));
 
 			var cookie = new CookieContainer();
-			var resultJson = await MPRequestUtility.Post(MP_LOGIN_URL, postData, cookie);
+			var resultJson = await MPRequestUtility.PostAsync(MP_LOGIN_URL, postData, cookie);
 
 			try
 			{
@@ -87,7 +87,7 @@ namespace WX.Tools
 			var url = string.Format(MP_ALL_MESSAGE_LIST_URL_FORMAT,
 				count, day, MPLoginContext.Current.Token);
 
-			var htmlContent = await MPRequestUtility.Get(url, MPLoginContext.Current.LoginCookie);
+			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{
@@ -127,7 +127,7 @@ namespace WX.Tools
 			var url = string.Format(MP_SINGLE_SEND_MESSAGE_LIST_URL_FORMAT,
 				fakeId, MPLoginContext.Current.Token);
 
-			var htmlContent = await MPRequestUtility.Get(url, MPLoginContext.Current.LoginCookie);
+			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{
@@ -167,7 +167,7 @@ namespace WX.Tools
 			var postData = string.Format("contacttype={0}&tofakeidlist={1}&token={2}&lang=zh_CN&random={3}&f=json&ajax=1&action=modifycontacts&t=ajax-putinto-group",
 				cateId, fakeId, MPLoginContext.Current.Token, "0.1234567890");
 
-			var resultJson = await MPRequestUtility.Post(MP_MODIFYCONTACKS_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MP_MODIFYCONTACKS_URL, postData, MPLoginContext.Current.LoginCookie);
 
 			try
 			{

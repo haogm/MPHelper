@@ -13,12 +13,12 @@ namespace WX.Tools.Test
 		static void Main(string[] args)
 		{
 			//var result = MPManager.ChangeCategoryAsync("760344340", "100").Result;
-			//var result = MPManager.GetAllMessageList(20, 7).Result;
-			var result = MPManager.GetSingleSendMessageList("126185600").Result;
+			var result = MPManager.GetAllMessageList(20, 7).Result;
+			//var result = MPManager.GetSingleSendMessageList("126185600").Result;
 
 			foreach (var item in result)
 			{
-				Console.WriteLine(item.content);
+				Console.WriteLine("fakeId: {0}, nick name: {1}, content: {2}", item.fakeid, item.nick_name, item.content);
 			}
 			//Console.WriteLine(result);
 

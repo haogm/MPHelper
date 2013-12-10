@@ -10,7 +10,7 @@ namespace WX.Tools.Utility
 
 	internal class MPRequestUtility
 	{
-		public static async Task<string> Post(string url, string postData, CookieContainer cookie, Encoding encoding = null)
+		public static async Task<string> PostAsync(string url, string postData, CookieContainer cookie, Encoding encoding = null)
 		{
 			var byteArray = Encoding.UTF8.GetBytes(postData);
 
@@ -53,7 +53,7 @@ namespace WX.Tools.Utility
 			return string.Empty;
 		}
 
-		public static async Task<string> Get(string url, CookieContainer cookie, Encoding encoding = null)
+		public static async Task<string> GetAsync(string url, CookieContainer cookie, Encoding encoding = null)
 		{
 			try
 			{
