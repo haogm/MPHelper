@@ -11,6 +11,10 @@
 4、发送信息（目前只支持文字消息）<br />
 5、更改用户分组<br />
 
+### 依赖
+1、[Json.Net](https://www.nuget.org/packages/Newtonsoft.Json) (from Nuget)<br />
+2、Hanger.dll (自己写的工具类库，可直接在Reference目录下引用dll)<br />
+
 ### 配置
 
 需在AppSetting中，配置公众账号用户名及密码
