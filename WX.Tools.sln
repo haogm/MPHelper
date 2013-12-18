@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WX.Tools", "WX.Tools\WX.Tools.csproj", "{864E9E09-F7D2-4157-924C-126CB66BFE1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WX.Tools.Test", "WX.Tools.Test\WX.Tools.Test.csproj", "{1593DC52-B338-49B7-908E-18EB83C8D46A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{9E8645FC-0CAB-4EFE-9BF7-B11CFD7FD514}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -24,10 +22,6 @@ Global
 		{864E9E09-F7D2-4157-924C-126CB66BFE1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{864E9E09-F7D2-4157-924C-126CB66BFE1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{864E9E09-F7D2-4157-924C-126CB66BFE1B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1593DC52-B338-49B7-908E-18EB83C8D46A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1593DC52-B338-49B7-908E-18EB83C8D46A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1593DC52-B338-49B7-908E-18EB83C8D46A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1593DC52-B338-49B7-908E-18EB83C8D46A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
