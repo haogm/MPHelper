@@ -6,21 +6,24 @@ using System.Threading.Tasks;
 
 namespace WX.Tools.Test
 {
+	using Hanger.Common;
 	using WX.Tools.Utility;
 
 	class Program
 	{
 		static void Main(string[] args)
 		{
-			//var result = MPManager.ChangeCategoryAsync("760344340", "100").Result;
-			var result = MPManager.GetAllMessageListAsync(20, 7).Result;
-			//var result = MPManager.GetSingleSendMessageList("126185600").Result;
+			//var result = MPManager.ChangeCategoryAsync("126185600", "100").Result;
+			//var result = MPManager.GetAllMessageListAsync(20, 7).Result;
+			//var result = MPManager.GetSingleSendMessageListAsync("126185600").Result;
+			//var result = MPManager.SendMessageAsync("126185600", "Hello world! 你好世界！").Result;
 
-			foreach (var item in result)
+			var result = MPManager.GetContactInfoAsync("126185600").Result;
+
+			if (result != null)
 			{
-				Console.WriteLine("fakeId: {0}, nick name: {1}, content: {2}", item.fakeid, item.nick_name, item.content);
+				Console.WriteLine(result.ObjectToJson());
 			}
-			//Console.WriteLine(result);
 
 			Console.ReadKey(true);
 		}

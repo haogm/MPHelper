@@ -16,10 +16,6 @@ namespace WX.Tools
 
 	public static class MPManager
 	{
-		const string MP_LOGIN_URL = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
-		const string MP_MODIFYCONTACKS_URL = "https://mp.weixin.qq.com/cgi-bin/modifycontacts";
-		const string MP_ALL_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count={0}&day={1}&token={2}&lang=zh_CN";
-		const string MP_SINGLE_SEND_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&tofakeid={0}&token={1}&lang=zh_CN";
 		static readonly string _mpAccount = AppSettingHelper.GetStringValue("MPAccount");
 		static readonly string _mpPassword = AppSettingHelper.GetStringValue("MPPassword");
 
@@ -41,7 +37,7 @@ namespace WX.Tools
 				StringHelper.GetMd5(_mpPassword));
 
 			var cookie = new CookieContainer();
-			var resultJson = await MPRequestUtility.PostAsync(MP_LOGIN_URL, postData, cookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LOGIN_URL, postData, cookie);
 
 			try
 			{
@@ -67,6 +63,11 @@ namespace WX.Tools
 			return success;
 		}
 
+		/// <summary>
+		/// 获取所有用户消息列表
+		/// </summary>
+		/// <param name="count">消息条数</param>
+		/// <param name="day">0：今天；1：昨天；以此类推，后台最多保存5天数据，默认全部消息</param>
 		public static async Task<IList<MessageItem>> GetAllMessageListAsync(int count = 20, int day = 7)
 		{
 			if (MPLoginContext.Current == null)
@@ -89,7 +90,7 @@ namespace WX.Tools
 				day = 7;
 			}
 
-			var url = string.Format(MP_ALL_MESSAGE_LIST_URL_FORMAT,
+			var url = string.Format(MPAddresses.ALL_MESSAGE_LIST_URL_FORMAT,
 				count, day, MPLoginContext.Current.Token);
 
 			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
@@ -117,6 +118,10 @@ namespace WX.Tools
 			return null;
 		}
 
+		/// <summary>
+		/// 获取单个用户对话消息列表
+		/// </summary>
+		/// <param name="fakeId">用户FakeId</param>
 		public static async Task<IList<MessageItem>> GetSingleSendMessageListAsync(string fakeId)
 		{
 			if (MPLoginContext.Current == null)
@@ -129,7 +134,7 @@ namespace WX.Tools
 				}
 			}
 
-			var url = string.Format(MP_SINGLE_SEND_MESSAGE_LIST_URL_FORMAT,
+			var url = string.Format(MPAddresses.SINGLE_SEND_MESSAGE_LIST_URL_FORMAT,
 				fakeId, MPLoginContext.Current.Token);
 
 			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
@@ -157,6 +162,11 @@ namespace WX.Tools
 			return null;
 		}
 
+		/// <summary>
+		/// 更改用户分组
+		/// </summary>
+		/// <param name="fakeId">用户FakeId</param>
+		/// <param name="cateId">分组ID</param>
 		public static async Task<bool> ChangeCategoryAsync(string fakeId, string cateId)
 		{
 			if (MPLoginContext.Current == null)
@@ -172,7 +182,7 @@ namespace WX.Tools
 			var postData = string.Format("contacttype={0}&tofakeidlist={1}&token={2}&lang=zh_CN&random={3}&f=json&ajax=1&action=modifycontacts&t=ajax-putinto-group",
 				cateId, fakeId, MPLoginContext.Current.Token, "0.1234567890");
 
-			var resultJson = await MPRequestUtility.PostAsync(MP_MODIFYCONTACKS_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MODIFY_CATEGORY_URL, postData, MPLoginContext.Current.LoginCookie);
 
 			try
 			{
@@ -189,6 +199,84 @@ namespace WX.Tools
 			}
 
 			return false;
+		}
+
+		/// <summary>
+		/// 发送信息，目前只支持文字消息
+		/// </summary>
+		/// <param name="fakeId">用户FakeId</param>
+		/// <param name="message">文字消息</param>
+		public static async Task<bool> SendMessageAsync(string fakeId, string message)
+		{
+			if (MPLoginContext.Current == null)
+			{
+				var login = await LoginAsync();
+
+				if (!login)
+				{
+					return false;
+				}
+			}
+
+			var postData = string.Format("type={0}&content={1}&tofakeid={2}&imgcode={3}&token={4}&lang=zh_CN&random={5}&f=json&ajax=1&t=ajax-response",
+				"1", message, fakeId, string.Empty, MPLoginContext.Current.Token, "0.1234567890");
+
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SEND_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
+
+			try
+			{
+				var resultPackage = JsonConvert.DeserializeObject<SendMessageResult>(resultJson);
+
+				if (resultPackage != null && resultPackage.base_resp != null
+					&& !string.IsNullOrWhiteSpace(resultPackage.base_resp.err_msg) && resultPackage.base_resp.err_msg.ToLower().Equals("ok"))
+				{
+					return true;
+				}
+			}
+			catch (Exception ex)
+			{
+				LocalLoggingService.Exception(ex);
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// 获取用户信息
+		/// </summary>
+		/// <param name="fakeId">用户FakeId</param>
+		public static async Task<ContactInfo> GetContactInfoAsync(string fakeId)
+		{
+			if (MPLoginContext.Current == null)
+			{
+				var login = await LoginAsync();
+
+				if (!login)
+				{
+					return null;
+				}
+			}
+
+			var postData = string.Format("fakeid={0}&token={1}&lang=zh_CN&random={2}&f=json&ajax=1&t=ajax-getcontactinfo",
+				fakeId, MPLoginContext.Current.Token, "0.1234567890");
+
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_USERINFO_URL, postData, MPLoginContext.Current.LoginCookie);
+
+			try
+			{
+				var resultPackage = JsonConvert.DeserializeObject<GetContactResult>(resultJson);
+
+				if (resultPackage != null)
+				{
+					return resultPackage.contact_info;
+				}
+			}
+			catch (Exception ex)
+			{
+				LocalLoggingService.Exception(ex);
+			}
+
+			return null;
 		}
 	}
 }

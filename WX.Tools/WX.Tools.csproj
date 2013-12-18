@@ -51,12 +51,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTOs\ContactInfo.cs" />
     <Compile Include="DTOs\MessageItem.cs" />
+    <Compile Include="MPAddresses.cs" />
+    <Compile Include="Results\BaseResp.cs" />
+    <Compile Include="Results\GetContactResult.cs" />
     <Compile Include="Results\ModifyContactResult.cs" />
     <Compile Include="MPLoginContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Results\LoginResult.cs" />
     <Compile Include="MPManager.cs" />
+    <Compile Include="Results\SendMessageResult.cs" />
     <Compile Include="Utility\MPRequestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
