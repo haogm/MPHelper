@@ -12,13 +12,13 @@
 5、更改用户分组<br />
 
 ### 依赖
-1、[Json.Net](https://www.nuget.org/packages/Newtonsoft.Json) (from Nuget)<br />
-2、Hanger.dll (自己写的工具类库，可直接在Reference目录下引用dll)<br />
+1、.Net Frameword版本: 4.5.1<br />
+2、[Json.Net](https://www.nuget.org/packages/Newtonsoft.Json) (from Nuget)<br />
+3、Hanger.dll (自己写的工具类库，可直接在Reference目录下引用dll)<br />
 
 ### 配置
-
-需在AppSetting中，配置公众账号用户名及密码
+需在AppSetting中，配置公众账号用户名及密码MD5
 ```xml
-<add key="MPAccount" value="foo" />
-<add key="MPPassword" value="bar" />
+<add key="MPAccount" value="公众号登录用户名" />
+<add key="MPPasswordMD5" value="公众号登录密码MD5" />
 ```

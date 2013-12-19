@@ -17,7 +17,7 @@ namespace WX.Tools
 	public static class MPManager
 	{
 		static readonly string _mpAccount = AppSettingHelper.GetStringValue("MPAccount");
-		static readonly string _mpPassword = AppSettingHelper.GetStringValue("MPPassword");
+		static readonly string _mpPasswordMD5 = AppSettingHelper.GetStringValue("MPPasswordMD5");
 
 		static async Task<bool> LoginAsync()
 		{
@@ -26,15 +26,14 @@ namespace WX.Tools
 				return true;
 			}
 
-			if (string.IsNullOrWhiteSpace(_mpAccount) || string.IsNullOrWhiteSpace(_mpPassword))
+			if (string.IsNullOrWhiteSpace(_mpAccount) || string.IsNullOrWhiteSpace(_mpPasswordMD5))
 			{
 				return false;
 			}
 
 			var success = false;
 			var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json",
-				HttpUtility.UrlEncode(_mpAccount),
-				StringHelper.GetMd5(_mpPassword));
+				HttpUtility.UrlEncode(_mpAccount), _mpPasswordMD5);
 
 			var cookie = new CookieContainer();
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LOGIN_URL, postData, cookie);
