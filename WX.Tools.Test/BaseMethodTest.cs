@@ -57,6 +57,20 @@ namespace WX.Tools.Test
 		}
 
 		[Test]
+		public void GetStarMessageListTest()
+		{
+			var messages = MPManager.GetStarMessageListAsync(1).Result;
+
+			if (messages != null && messages.Count() > 0)
+			{
+				Console.WriteLine("FakeId: {0}", messages.First().fakeid);
+			}
+
+			Assert.NotNull(messages);
+			Assert.IsTrue(messages.Count() > 0);
+		}
+
+		[Test]
 		public void SendMessageTest()
 		{
 			/*

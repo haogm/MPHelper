@@ -118,6 +118,55 @@ namespace WX.Tools
 		}
 
 		/// <summary>
+		/// 获取星标消息列表
+		/// </summary>
+		/// <param name="count">消息条数</param>
+		public static async Task<IList<MessageItem>> GetStarMessageListAsync(int count = 20)
+		{
+			if (MPLoginContext.Current == null)
+			{
+				var login = await LoginAsync();
+
+				if (!login)
+				{
+					return null;
+				}
+			}
+
+			if (count < 1 || count > 100)
+			{
+				count = 20;
+			}
+
+			var url = string.Format(MPAddresses.STAR_MESSAGE_LIST_URL_FORMAT,
+				count, MPLoginContext.Current.Token);
+
+			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
+
+			if (!string.IsNullOrWhiteSpace(htmlContent))
+			{
+				var regex = new Regex(@"(?<=\({""msg_item"":\[).*(?=\]}\).msg_item)", RegexOptions.IgnoreCase);
+				var match = regex.Match(htmlContent);
+
+				if (match.Groups.Count > 0)
+				{
+					var listJson = string.Format("[{0}]", match.Groups[0].Value);
+
+					try
+					{
+						return listJson.JsonToObject<List<MessageItem>>();
+					}
+					catch (Exception ex)
+					{
+						LocalLoggingService.Exception(ex);
+					}
+				}
+			}
+
+			return null;
+		}
+
+		/// <summary>
 		/// 获取单个用户对话消息列表
 		/// </summary>
 		/// <param name="fakeId">用户FakeId</param>
