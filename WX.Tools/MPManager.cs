@@ -14,6 +14,9 @@ namespace WX.Tools
 	using WX.Tools.Results;
 	using WX.Tools.Utility;
 
+	/// <summary>
+	/// 操作集合类
+	/// </summary>
 	public static class MPManager
 	{
 		static readonly string _mpAccount = AppSettingHelper.GetStringValue("MPAccount");
@@ -206,7 +209,7 @@ namespace WX.Tools
 		}
 
 		/// <summary>
-		/// 更改用户分组
+		/// 更改用户分组（0：未分组； 1：黑名单； 2：星标组）
 		/// </summary>
 		/// <param name="fakeId">用户FakeId</param>
 		/// <param name="cateId">分组ID</param>
