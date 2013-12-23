@@ -92,29 +92,7 @@ namespace WX.Tools
 			var url = string.Format(MPAddresses.ALL_MESSAGE_LIST_URL_FORMAT,
 				count, day, MPLoginContext.Current.Token);
 
-			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
-
-			if (!string.IsNullOrWhiteSpace(htmlContent))
-			{
-				var regex = new Regex(@"(?<=\({""msg_item"":\[).*(?=\]}\).msg_item)", RegexOptions.IgnoreCase);
-				var match = regex.Match(htmlContent);
-
-				if (match.Groups.Count > 0)
-				{
-					var listJson = string.Format("[{0}]", match.Groups[0].Value);
-
-					try
-					{
-						return listJson.JsonToObject<List<MessageItem>>();
-					}
-					catch (Exception ex)
-					{
-						LocalLoggingService.Exception(ex);
-					}
-				}
-			}
-
-			return null;
+			return await GetMessageListAsync(url);
 		}
 
 		/// <summary>
@@ -141,29 +119,46 @@ namespace WX.Tools
 			var url = string.Format(MPAddresses.STAR_MESSAGE_LIST_URL_FORMAT,
 				count, MPLoginContext.Current.Token);
 
-			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
+			return await GetMessageListAsync(url);
+		}
 
-			if (!string.IsNullOrWhiteSpace(htmlContent))
+		/// <summary>
+		/// 设置/取消星标消息
+		/// </summary>
+		/// <param name="messageId">消息ID</param>
+		/// <param name="isStar">是否为星标</param>
+		public static async Task<bool> SetStarMessageAsync(string messageId, bool isStar)
+		{
+			if (MPLoginContext.Current == null)
 			{
-				var regex = new Regex(@"(?<=\({""msg_item"":\[).*(?=\]}\).msg_item)", RegexOptions.IgnoreCase);
-				var match = regex.Match(htmlContent);
+				var login = await LoginAsync();
 
-				if (match.Groups.Count > 0)
+				if (!login)
 				{
-					var listJson = string.Format("[{0}]", match.Groups[0].Value);
-
-					try
-					{
-						return listJson.JsonToObject<List<MessageItem>>();
-					}
-					catch (Exception ex)
-					{
-						LocalLoggingService.Exception(ex);
-					}
+					return false;
 				}
 			}
 
-			return null;
+			var postData = string.Format("msgid={0}&value={1}&token={2}&lang=zh_CN&random={3}&f=json&ajax=1&t=ajax-setstarmessage",
+				messageId, isStar ? "1" : "0", MPLoginContext.Current.Token, "0.1234567890");
+
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
+
+			try
+			{
+				var resultPackage = JsonConvert.DeserializeObject<SetStarMassageResult>(resultJson);
+
+				if (resultPackage != null && resultPackage.msg.Equals("sys ok"))
+				{
+					return true;
+				}
+			}
+			catch (Exception ex)
+			{
+				LocalLoggingService.Exception(ex);
+			}
+
+			return false;
 		}
 
 		/// <summary>
@@ -326,5 +321,36 @@ namespace WX.Tools
 
 			return null;
 		}
+
+		#region private
+
+		static async Task<IList<MessageItem>> GetMessageListAsync(string url)
+		{
+			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
+
+			if (!string.IsNullOrWhiteSpace(htmlContent))
+			{
+				var regex = new Regex(@"(?<=\({""msg_item"":\[).*(?=\]}\).msg_item)", RegexOptions.IgnoreCase);
+				var match = regex.Match(htmlContent);
+
+				if (match.Groups.Count > 0)
+				{
+					var listJson = string.Format("[{0}]", match.Groups[0].Value);
+
+					try
+					{
+						return listJson.JsonToObject<List<MessageItem>>();
+					}
+					catch (Exception ex)
+					{
+						LocalLoggingService.Exception(ex);
+					}
+				}
+			}
+
+			return null;
+		}
+
+		#endregion
 	}
 }

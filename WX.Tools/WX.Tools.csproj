@@ -51,6 +51,7 @@
     <Compile Include="DTOs\ContactInfo.cs" />
     <Compile Include="DTOs\MessageItem.cs" />
     <Compile Include="MPAddresses.cs" />
+    <Compile Include="Results\SetStarMassageResult.cs" />
     <Compile Include="Results\BaseResp.cs" />
     <Compile Include="Results\GetContactResult.cs" />
     <Compile Include="Results\ModifyContactResult.cs" />

@@ -36,6 +36,11 @@ namespace WX.Tools
 		public const string STAR_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count={0}&action=star&token={1}&lang=zh_CN";
 
 		/// <summary>
+		/// 设置星标消息
+		/// </summary>
+		public const string SET_START_MESSAGE_URL = "https://mp.weixin.qq.com/cgi-bin/setstarmessage";
+
+		/// <summary>
 		/// 单个用户对话消息列表
 		/// </summary>
 		public const string SINGLE_SEND_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&tofakeid={0}&token={1}&lang=zh_CN";

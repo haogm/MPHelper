@@ -71,6 +71,20 @@ namespace WX.Tools.Test
 		}
 
 		[Test]
+		public void SetStarMessageTest()
+		{
+			var success = false;
+			var messages = MPManager.GetAllMessageListAsync(1).Result;
+
+			if (messages != null && messages.Count() > 0)
+			{
+				success = MPManager.SetStarMessageAsync(messages.First().id.ToString(), true).Result;
+			}
+
+			Assert.IsTrue(success);
+		}
+
+		[Test]
 		public void SendMessageTest()
 		{
 			/*
