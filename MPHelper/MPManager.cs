@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,24 +16,43 @@ namespace MPHelper
 	/// <summary>
 	/// 操作集合类
 	/// </summary>
-	public static class MPManager
+	public class MPManager
 	{
-		static readonly string _mpAccount = ConfigurationManager.AppSettings["MPAccount"];
-		static readonly string _mpPasswordMD5 = ConfigurationManager.AppSettings["MPPasswordMD5"];
+		private static readonly object _locker = new object();
+		private static Dictionary<string, MPLoginContext> _LoginContext = new Dictionary<string, MPLoginContext>();
+
+		private string _mpAccount;
+		private string _mpPasswordMD5;
+
+		/// <summary>
+		/// MPManager
+		/// </summary>
+		/// <param name="mpAccount">公众账号登录用户名</param>
+		/// <param name="mpPasswordMD5">公众账号登录密码MD5值</param>
+		public MPManager(string mpAccount, string mpPasswordMD5)
+		{
+			if (string.IsNullOrWhiteSpace(mpAccount))
+			{
+				throw new ArgumentNullException("mpAccount");
+			}
+
+			if (string.IsNullOrWhiteSpace(mpPasswordMD5))
+			{
+				throw new ArgumentNullException("mpPasswordMD5");
+			}
+
+			_mpAccount = mpAccount;
+			_mpPasswordMD5 = mpPasswordMD5;
+		}
 
 		/// <summary>
 		/// 模拟后台登录
 		/// </summary>
-		static async Task<bool> LoginAsync()
+		private async Task<bool> LoginAsync()
 		{
-			if (MPLoginContext.Current != null)
+			if (_LoginContext.ContainsKey(_mpAccount) && _LoginContext[_mpAccount].IsValid())
 			{
 				return true;
-			}
-
-			if (string.IsNullOrWhiteSpace(_mpAccount) || string.IsNullOrWhiteSpace(_mpPasswordMD5))
-			{
-				return false;
 			}
 
 			var success = false;
@@ -51,7 +69,20 @@ namespace MPHelper
 
 				if (!string.IsNullOrWhiteSpace(token))
 				{
-					MPLoginContext.SetLoginStatus(token, cookie);
+					if (!_LoginContext.ContainsKey(_mpAccount))
+					{
+						lock (_locker)
+						{
+							if (!_LoginContext.ContainsKey(_mpAccount))
+							{
+								_LoginContext.Add(_mpAccount, new MPLoginContext());
+							}
+						}
+					}
+
+					_LoginContext[_mpAccount].Token = token;
+					_LoginContext[_mpAccount].LoginCookie = cookie;
+					_LoginContext[_mpAccount].CreateDate = DateTime.Now;
 
 					success = true;
 				}
@@ -65,16 +96,11 @@ namespace MPHelper
 		/// </summary>
 		/// <param name="count">消息条数</param>
 		/// <param name="day">0：今天；1：昨天；以此类推，后台最多保存5天数据，默认全部消息</param>
-		public static async Task<IList<MessageItem>> GetAllMessageListAsync(int count = 20, int day = 7)
+		public async Task<IList<MessageItem>> GetAllMessageListAsync(int count = 20, int day = 7)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return null;
-				}
+				return null;
 			}
 
 			if (count < 1 || count > 100)
@@ -88,7 +114,7 @@ namespace MPHelper
 			}
 
 			var url = string.Format(MPAddresses.ALL_MESSAGE_LIST_URL_FORMAT,
-				count, day, MPLoginContext.Current.Token);
+				count, day, _LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
 		}
@@ -97,16 +123,11 @@ namespace MPHelper
 		/// 获取星标消息列表
 		/// </summary>
 		/// <param name="count">消息条数</param>
-		public static async Task<IList<MessageItem>> GetStarMessageListAsync(int count = 20)
+		public async Task<IList<MessageItem>> GetStarMessageListAsync(int count = 20)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return null;
-				}
+				return null;
 			}
 
 			if (count < 1 || count > 100)
@@ -115,7 +136,7 @@ namespace MPHelper
 			}
 
 			var url = string.Format(MPAddresses.STAR_MESSAGE_LIST_URL_FORMAT,
-				count, MPLoginContext.Current.Token);
+				count, _LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
 		}
@@ -125,22 +146,17 @@ namespace MPHelper
 		/// </summary>
 		/// <param name="messageId">消息ID</param>
 		/// <param name="isStar">是否为星标</param>
-		public static async Task<bool> SetStarMessageAsync(string messageId, bool isStar)
+		public async Task<bool> SetStarMessageAsync(string messageId, bool isStar)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return false;
-				}
+				return false;
 			}
 
 			var postData = string.Format("msgid={0}&value={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-setstarmessage",
-				messageId, isStar ? "1" : "0", MPLoginContext.Current.Token);
+				messageId, isStar ? "1" : "0", _LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, _LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<CommonExecuteResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.msg.Equals("sys ok"))
@@ -155,22 +171,17 @@ namespace MPHelper
 		/// 获取单个用户对话消息列表
 		/// </summary>
 		/// <param name="fakeId">用户FakeId</param>
-		public static async Task<IList<MessageItem>> GetSingleSendMessageListAsync(string fakeId)
+		public async Task<IList<MessageItem>> GetSingleSendMessageListAsync(string fakeId)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return null;
-				}
+				return null;
 			}
 
 			var url = string.Format(MPAddresses.SINGLE_SEND_MESSAGE_LIST_URL_FORMAT,
-				fakeId, MPLoginContext.Current.Token);
+				fakeId, _LoginContext[_mpAccount].Token);
 
-			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
+			var htmlContent = await MPRequestUtility.GetAsync(url, _LoginContext[_mpAccount].LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{
@@ -193,29 +204,24 @@ namespace MPHelper
 		/// </summary>
 		/// <param name="fakeId">用户FakeId</param>
 		/// <param name="cateId">分组ID</param>
-		public static async Task<bool> ChangeCategoryAsync(string fakeId, string cateId)
+		public async Task<bool> ChangeCategoryAsync(string fakeId, string cateId)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return false;
-				}
+				return false;
 			}
 
 			var postData = string.Format("contacttype={0}&tofakeidlist={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&action=modifycontacts&t=ajax-putinto-group",
-				cateId, fakeId, MPLoginContext.Current.Token);
+				cateId, fakeId, _LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MODIFY_CATEGORY_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MODIFY_CATEGORY_URL, postData, _LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<ModifyContactResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.result.Count > 0 && resultPackage.result[0].fakeId == fakeId)
 			{
 				return true;
 			}
-			
+
 			return false;
 		}
 
@@ -223,22 +229,17 @@ namespace MPHelper
 		/// 获取用户信息
 		/// </summary>
 		/// <param name="fakeId">用户FakeId</param>
-		public static async Task<ContactInfo> GetContactInfoAsync(string fakeId)
+		public async Task<ContactInfo> GetContactInfoAsync(string fakeId)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return null;
-				}
+				return null;
 			}
 
 			var postData = string.Format("fakeid={0}&token={1}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-getcontactinfo",
-				fakeId, MPLoginContext.Current.Token);
+				fakeId, _LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_CONTACTINFO_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_CONTACTINFO_URL, postData, _LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<GetContactResult>(resultJson);
 
 			if (resultPackage != null)
@@ -259,22 +260,17 @@ namespace MPHelper
 		/// 图片、音频、视频消息：文件ID; 
 		/// 图文消息：消息ID; 
 		/// </param>
-		public static async Task<bool> SingleSendMessageAsync(string fakeId, MPMessageType type, string value)
+		public async Task<bool> SingleSendMessageAsync(string fakeId, MPMessageType type, string value)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return false;
-				}
+				return false;
 			}
 
 			var postData = new StringBuilder();
 
 			postData.AppendFormat("type={0}&tofakeid={1}&&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
-				(int)type, fakeId, MPLoginContext.Current.Token);
+				(int)type, fakeId, _LoginContext[_mpAccount].Token);
 
 			switch (type)
 			{
@@ -308,7 +304,7 @@ namespace MPHelper
 					break;
 			}
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SINGLE_SEND_MESSAGE_URL, postData.ToString(), MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SINGLE_SEND_MESSAGE_URL, postData.ToString(), _LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<SendMessageResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.base_resp != null
@@ -335,17 +331,12 @@ namespace MPHelper
 		/// <param name="province">省</param>
 		/// <param name="city">市</param>
 		/// <returns></returns>
-		public static async Task<bool> MassSendMessageAsync(MPMessageType type, string value, string groupId = "-1", int gender = 0,
+		public async Task<bool> MassSendMessageAsync(MPMessageType type, string value, string groupId = "-1", int gender = 0,
 			string country = null, string province = null, string city = null)
 		{
-			if (MPLoginContext.Current == null)
+			if (!await this.LoginAsync())
 			{
-				var login = await LoginAsync();
-
-				if (!login)
-				{
-					return false;
-				}
+				return false;
 			}
 
 			var postData = new StringBuilder();
@@ -355,7 +346,7 @@ namespace MPHelper
 				string.IsNullOrWhiteSpace(country) ? string.Empty : HttpUtility.UrlEncode(country, Encoding.UTF8),
 				string.IsNullOrWhiteSpace(province) ? string.Empty : HttpUtility.UrlEncode(province, Encoding.UTF8),
 				string.IsNullOrWhiteSpace(city) ? string.Empty : HttpUtility.UrlEncode(city, Encoding.UTF8),
-				MPLoginContext.Current.Token);
+				_LoginContext[_mpAccount].Token);
 
 			switch (type)
 			{
@@ -389,7 +380,7 @@ namespace MPHelper
 					break;
 			}
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MASS_SEND__MESSAGE_URL, postData.ToString(), MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MASS_SEND__MESSAGE_URL, postData.ToString(), _LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<CommonExecuteResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.ret == 0)
@@ -399,12 +390,12 @@ namespace MPHelper
 
 			return false;
 		}
-		
+
 		#region private
 
-		static async Task<IList<MessageItem>> GetMessageListAsync(string url)
+		private async Task<IList<MessageItem>> GetMessageListAsync(string url)
 		{
-			var htmlContent = await MPRequestUtility.GetAsync(url, MPLoginContext.Current.LoginCookie);
+			var htmlContent = await MPRequestUtility.GetAsync(url, _LoginContext[_mpAccount].LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{

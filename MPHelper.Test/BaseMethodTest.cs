@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace MPHelper.Test
 {
@@ -6,13 +7,23 @@ namespace MPHelper.Test
 
     public class BaseMethodTest
     {
+		const string MP_ACCOUNT = "010227leo@gmail.com";
+		const string MP_PASSWORD_MD5 = "498a5846ae15e26c96cffd8e21eb483b";
 		const string FAKE_ID = "126185600";
 		const string CATEGORY_ID = "0";
+
+		private MPManager _MPManager;
+
+		[SetUp]
+		protected void TestSetUp()
+		{
+			_MPManager = new MPManager(MP_ACCOUNT, MP_PASSWORD_MD5);
+		}
 
 		[Test]
 		public void GetContactInfoTest()
 		{
-			var contactInfo = MPManager.GetContactInfoAsync(FAKE_ID).Result;
+			var contactInfo = _MPManager.GetContactInfoAsync(FAKE_ID).Result;
 
 			Assert.NotNull(contactInfo);
 			Assert.AreEqual(FAKE_ID, contactInfo.fake_id.ToString());
@@ -21,7 +32,7 @@ namespace MPHelper.Test
 		[Test]
 		public void GetSingleSendMessageListTest()
 		{
-			var messages = MPManager.GetSingleSendMessageListAsync(FAKE_ID).Result;
+			var messages = _MPManager.GetSingleSendMessageListAsync(FAKE_ID).Result;
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Count() > 0);
@@ -30,7 +41,7 @@ namespace MPHelper.Test
 		[Test]
 		public void GetAllMessageListTest()
 		{
-			var messages = MPManager.GetAllMessageListAsync(1).Result;
+			var messages = _MPManager.GetAllMessageListAsync(1).Result;
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Count() > 0);
@@ -39,7 +50,7 @@ namespace MPHelper.Test
 		[Test]
 		public void GetStarMessageListTest()
 		{
-			var messages = MPManager.GetStarMessageListAsync(1).Result;
+			var messages = _MPManager.GetStarMessageListAsync(1).Result;
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Count() > 0);
@@ -49,11 +60,11 @@ namespace MPHelper.Test
 		public void SetStarMessageTest()
 		{
 			var success = false;
-			var messages = MPManager.GetAllMessageListAsync(1).Result;
+			var messages = _MPManager.GetAllMessageListAsync(1).Result;
 
 			if (messages != null && messages.Count() > 0)
 			{
-				success = MPManager.SetStarMessageAsync(messages.First().id.ToString(), true).Result;
+				success = _MPManager.SetStarMessageAsync(messages.First().id.ToString(), true).Result;
 			}
 
 			Assert.IsTrue(success);
@@ -63,11 +74,11 @@ namespace MPHelper.Test
 		public void SingleSendMessageTest()
 		{
 			/*
-			 * 可先给公众账号发送一条消息，确保突破24小时限制
+			 * 可先给公众账号发送一条消息，确保突破24小时限制。
 			 */
 
 			var message = "SingleSendMessageTest: test from MPHelper! 中文消息测试！";
-			var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Text, message).Result;
+			var success = _MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Text, message).Result;
 
 			//var fileId = "10013378";
 			//var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, fileId).Result;
@@ -81,8 +92,14 @@ namespace MPHelper.Test
 		[Test]
 		public void MassSendMessageTest()
 		{
-			var message = "MassSendMessageTest: test from MPHelper! 中文消息测试！";
-			var success = MPManager.MassSendMessageAsync(MPMessageType.Text, message).Result;
+			/*
+			 * 群发消息受公众账号限制（订阅号一天一条，服务号一个月一条），单元测试慎用。
+			 */
+
+			var success = true;
+			//var message = "MassSendMessageTest: test from MPHelper! 中文消息测试！";
+
+			//success = _MPManager.MassSendMessageAsync(MPMessageType.Text, message).Result;
 
 			Assert.IsTrue(success);
 		}
@@ -90,7 +107,7 @@ namespace MPHelper.Test
 		[Test]
 		public void ChangeCategoryTest()
 		{
-			var success = MPManager.ChangeCategoryAsync(FAKE_ID, CATEGORY_ID).Result;
+			var success = _MPManager.ChangeCategoryAsync(FAKE_ID, CATEGORY_ID).Result;
 
 			Assert.IsTrue(success);
 		}
