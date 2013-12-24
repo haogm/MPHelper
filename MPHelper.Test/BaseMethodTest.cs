@@ -66,14 +66,23 @@ namespace MPHelper.Test
 			 * 可先给公众账号发送一条消息，确保突破24小时限制
 			 */
 
-			var message = "Hello world!";
+			var message = "SingleSendMessageTest: test from MPHelper! 中文消息测试！";
 			var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Text, message).Result;
 
 			//var fileId = "10013378";
-			//var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, null,fileId).Result;
+			//var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, fileId).Result;
 
 			//var appMsgId = "10013374";
-			//var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.AppMsg, null, null, appMsgId).Result;
+			//var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.AppMsg, appMsgId).Result;
+
+			Assert.IsTrue(success);
+		}
+
+		[Test]
+		public void MassSendMessageTest()
+		{
+			var message = "MassSendMessageTest: test from MPHelper! 中文消息测试！";
+			var success = MPManager.MassSendMessageAsync(MPMessageType.Text, message).Result;
 
 			Assert.IsTrue(success);
 		}

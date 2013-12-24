@@ -2,6 +2,9 @@
 
 namespace MPHelper
 {
+	/// <summary>
+	/// 发送消息类型
+	/// </summary>
 	public enum MPMessageType
 	{
 		/// <summary>

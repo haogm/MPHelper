@@ -19,7 +19,7 @@ namespace MPHelper
 		public const string SINGLE_SEND_MESSAGE_URL = "https://mp.weixin.qq.com/cgi-bin/singlesend";
 
 		/// <summary>
-		/// 群发消息
+		/// 群组消息推送
 		/// </summary>
 		public const string MASS_SEND__MESSAGE_URL = "https://mp.weixin.qq.com/cgi-bin/masssend";
 
