@@ -5,23 +5,22 @@ namespace MPHelper
 {
 	internal class MPLoginContext
 	{
-		const int EXPIRES_MINUTES = 15;
-
 		public string Token { get; set; }
 
 		public CookieContainer LoginCookie { get; set; }
 
-		private DateTime CreateDate { get; set; }
+		public DateTime CreateDate { get; set; }
 
-
-		private static object _locker = new object();
-		private static MPLoginContext _current;
+		static readonly int _expirationMinutes = 15;
+		static readonly object _locker = new object();
+		static MPLoginContext _current;
 
 		public static MPLoginContext Current
 		{
 			get
 			{
-				if (_current != null && _current.LoginCookie != null && _current.CreateDate.AddMinutes(EXPIRES_MINUTES) > DateTime.Now)
+				if (_current != null && _current.LoginCookie != null 
+					&& _current.CreateDate.AddMinutes(_expirationMinutes) > DateTime.Now)
 				{
 					return _current;
 				}

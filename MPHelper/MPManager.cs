@@ -7,10 +7,10 @@ using System.Web;
 
 namespace MPHelper
 {
-	using Newtonsoft.Json;
 	using MPHelper.DTOs;
 	using MPHelper.Results;
 	using MPHelper.Utility;
+	using Newtonsoft.Json;
 
 	/// <summary>
 	/// 操作集合类
@@ -20,6 +20,9 @@ namespace MPHelper
 		static readonly string _mpAccount = ConfigurationManager.AppSettings["MPAccount"];
 		static readonly string _mpPasswordMD5 = ConfigurationManager.AppSettings["MPPasswordMD5"];
 
+		/// <summary>
+		/// 模拟后台登录
+		/// </summary>
 		static async Task<bool> LoginAsync()
 		{
 			if (MPLoginContext.Current != null)
