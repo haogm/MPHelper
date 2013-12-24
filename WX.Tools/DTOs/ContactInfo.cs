@@ -42,7 +42,7 @@ namespace WX.Tools.DTOs
 		public string country { get; set; }
 
 		/// <summary>
-		/// 性别（1：男； 0：女）
+		/// 性别（1：男； 2：女）
 		/// </summary>
 		public int gender { get; set; }
 

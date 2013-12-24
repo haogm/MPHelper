@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Configuration;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -7,8 +7,6 @@ using System.Web;
 
 namespace WX.Tools
 {
-	using Hanger.Common;
-	using Hanger.Utility;
 	using Newtonsoft.Json;
 	using WX.Tools.DTOs;
 	using WX.Tools.Results;
@@ -19,8 +17,8 @@ namespace WX.Tools
 	/// </summary>
 	public static class MPManager
 	{
-		static readonly string _mpAccount = AppSettingHelper.GetStringValue("MPAccount");
-		static readonly string _mpPasswordMD5 = AppSettingHelper.GetStringValue("MPPasswordMD5");
+		static readonly string _mpAccount = ConfigurationManager.AppSettings["MPAccount"];
+		static readonly string _mpPasswordMD5 = ConfigurationManager.AppSettings["MPPasswordMD5"];
 
 		static async Task<bool> LoginAsync()
 		{
@@ -40,26 +38,18 @@ namespace WX.Tools
 
 			var cookie = new CookieContainer();
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LOGIN_URL, postData, cookie);
+			var resultPackage = JsonConvert.DeserializeObject<LoginResult>(resultJson);
 
-			try
+			if (resultPackage != null && resultPackage.ErrMsg.Length > 0)
 			{
-				var result = JsonConvert.DeserializeObject<LoginResult>(resultJson);
+				var token = resultPackage.ErrMsg.Split(new char[] { '&' })[2].Split(new char[] { '=' })[1];
 
-				if (result != null && result.ErrMsg.Length > 0)
+				if (!string.IsNullOrWhiteSpace(token))
 				{
-					var token = result.ErrMsg.Split(new char[] { '&' })[2].Split(new char[] { '=' })[1];
+					MPLoginContext.SetLoginStatus(token, cookie);
 
-					if (!string.IsNullOrWhiteSpace(token))
-					{
-						MPLoginContext.SetLoginStatus(token, cookie);
-
-						success = true;
-					}
+					success = true;
 				}
-			}
-			catch (Exception ex)
-			{
-				LocalLoggingService.Exception(ex);
 			}
 
 			return success;
@@ -146,19 +136,11 @@ namespace WX.Tools
 				messageId, isStar ? "1" : "0", MPLoginContext.Current.Token, "0.1234567890");
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultPackage = JsonConvert.DeserializeObject<SetStarMassageResult>(resultJson);
 
-			try
+			if (resultPackage != null && resultPackage.msg.Equals("sys ok"))
 			{
-				var resultPackage = JsonConvert.DeserializeObject<SetStarMassageResult>(resultJson);
-
-				if (resultPackage != null && resultPackage.msg.Equals("sys ok"))
-				{
-					return true;
-				}
-			}
-			catch (Exception ex)
-			{
-				LocalLoggingService.Exception(ex);
+				return true;
 			}
 
 			return false;
@@ -194,14 +176,7 @@ namespace WX.Tools
 				{
 					var listJson = string.Format("[{0}]", match.Groups[0].Value);
 
-					try
-					{
-						return listJson.JsonToObject<List<MessageItem>>();
-					}
-					catch (Exception ex)
-					{
-						LocalLoggingService.Exception(ex);
-					}
+					return JsonHelper.Deserialize<List<MessageItem>>(listJson);
 				}
 			}
 
@@ -229,21 +204,13 @@ namespace WX.Tools
 				cateId, fakeId, MPLoginContext.Current.Token, "0.1234567890");
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MODIFY_CATEGORY_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultPackage = JsonConvert.DeserializeObject<ModifyContactResult>(resultJson);
 
-			try
+			if (resultPackage != null && resultPackage.result.Count > 0 && resultPackage.result[0].fakeId == fakeId)
 			{
-				var resultPackage = JsonConvert.DeserializeObject<ModifyContactResult>(resultJson);
-
-				if (resultPackage != null && resultPackage.result.Count > 0 && resultPackage.result[0].fakeId == fakeId)
-				{
-					return true;
-				}
+				return true;
 			}
-			catch (Exception ex)
-			{
-				LocalLoggingService.Exception(ex);
-			}
-
+			
 			return false;
 		}
 
@@ -268,20 +235,12 @@ namespace WX.Tools
 				"1", message, fakeId, string.Empty, MPLoginContext.Current.Token, "0.1234567890");
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SEND_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultPackage = JsonConvert.DeserializeObject<SendMessageResult>(resultJson);
 
-			try
+			if (resultPackage != null && resultPackage.base_resp != null
+				&& !string.IsNullOrWhiteSpace(resultPackage.base_resp.err_msg) && resultPackage.base_resp.err_msg.ToLower().Equals("ok"))
 			{
-				var resultPackage = JsonConvert.DeserializeObject<SendMessageResult>(resultJson);
-
-				if (resultPackage != null && resultPackage.base_resp != null
-					&& !string.IsNullOrWhiteSpace(resultPackage.base_resp.err_msg) && resultPackage.base_resp.err_msg.ToLower().Equals("ok"))
-				{
-					return true;
-				}
-			}
-			catch (Exception ex)
-			{
-				LocalLoggingService.Exception(ex);
+				return true;
 			}
 
 			return false;
@@ -307,19 +266,11 @@ namespace WX.Tools
 				fakeId, MPLoginContext.Current.Token, "0.1234567890");
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_USERINFO_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultPackage = JsonConvert.DeserializeObject<GetContactResult>(resultJson);
 
-			try
+			if (resultPackage != null)
 			{
-				var resultPackage = JsonConvert.DeserializeObject<GetContactResult>(resultJson);
-
-				if (resultPackage != null)
-				{
-					return resultPackage.contact_info;
-				}
-			}
-			catch (Exception ex)
-			{
-				LocalLoggingService.Exception(ex);
+				return resultPackage.contact_info;
 			}
 
 			return null;
@@ -340,14 +291,7 @@ namespace WX.Tools
 				{
 					var listJson = string.Format("[{0}]", match.Groups[0].Value);
 
-					try
-					{
-						return listJson.JsonToObject<List<MessageItem>>();
-					}
-					catch (Exception ex)
-					{
-						LocalLoggingService.Exception(ex);
-					}
+					return JsonHelper.Deserialize<List<MessageItem>>(listJson);
 				}
 			}
 

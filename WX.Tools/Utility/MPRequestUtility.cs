@@ -1,13 +1,10 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace WX.Tools.Utility
 {
-	using Hanger.Common;
-
 	internal class MPRequestUtility
 	{
 		public static async Task<string> PostAsync(string url, string postData, CookieContainer cookie, Encoding encoding = null)
@@ -46,12 +43,10 @@ namespace WX.Tools.Utility
 					}
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				LocalLoggingService.Exception(ex);
+				return string.Empty;
 			}
-
-			return string.Empty;
 		}
 
 		public static async Task<string> GetAsync(string url, CookieContainer cookie, Encoding encoding = null)
@@ -79,12 +74,10 @@ namespace WX.Tools.Utility
 					}
 				}
 			}
-			catch (Exception ex)
+			catch
 			{
-				LocalLoggingService.Exception(ex);
+				return string.Empty;
 			}
-
-			return string.Empty;
 		}
 	}
 }

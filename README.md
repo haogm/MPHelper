@@ -16,7 +16,6 @@
 ### 依赖
 1、.Net Frameword版本: 4.5.1<br />
 2、[Json.Net](https://www.nuget.org/packages/Newtonsoft.Json) (from Nuget)<br />
-3、Hanger.dll (自己写的工具类库，可直接在Reference目录下引用dll)<br />
 
 ### 配置
 需在AppSetting中，配置公众账号用户名及密码MD5

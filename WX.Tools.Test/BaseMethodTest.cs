@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 namespace WX.Tools.Test
 {
-	using Hanger.Common;
 	using NUnit.Framework;
 
     public class BaseMethodTest
@@ -19,11 +14,6 @@ namespace WX.Tools.Test
 		{
 			var contactInfo = MPManager.GetContactInfoAsync(FAKE_ID).Result;
 
-			if (contactInfo != null)
-			{
-				Console.WriteLine("ContactInfo: {0}", contactInfo.ObjectToJson());
-			}
-
 			Assert.NotNull(contactInfo);
 			Assert.AreEqual(FAKE_ID, contactInfo.fake_id.ToString());
 		}
@@ -32,11 +22,6 @@ namespace WX.Tools.Test
 		public void GetSingleSendMessageListTest()
 		{
 			var messages = MPManager.GetSingleSendMessageListAsync(FAKE_ID).Result;
-
-			if (messages != null && messages.Count() > 0)
-			{
-				Console.WriteLine("FakeId: {0}", messages.First().fakeid);
-			}
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Count() > 0);
@@ -47,11 +32,6 @@ namespace WX.Tools.Test
 		{
 			var messages = MPManager.GetAllMessageListAsync(1).Result;
 
-			if (messages != null && messages.Count() > 0)
-			{
-				Console.WriteLine("FakeId: {0}", messages.First().fakeid);
-			}
-
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Count() > 0);
 		}
@@ -60,11 +40,6 @@ namespace WX.Tools.Test
 		public void GetStarMessageListTest()
 		{
 			var messages = MPManager.GetStarMessageListAsync(1).Result;
-
-			if (messages != null && messages.Count() > 0)
-			{
-				Console.WriteLine("FakeId: {0}", messages.First().fakeid);
-			}
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Count() > 0);

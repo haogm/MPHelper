@@ -33,13 +33,11 @@
     <DocumentationFile>bin\Release\WX.Tools.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Hanger">
-      <HintPath>..\Reference\Hanger.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +59,7 @@
     <Compile Include="Results\LoginResult.cs" />
     <Compile Include="MPManager.cs" />
     <Compile Include="Results\SendMessageResult.cs" />
+    <Compile Include="Utility\JsonHelper.cs" />
     <Compile Include="Utility\MPRequestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
