@@ -4,7 +4,7 @@ namespace MPHelper.Results
 {
 	internal class ModifyContactResult
 	{
-		public string ret { get; set; }
+		public int ret { get; set; }
 		public List<ModifyContactResultDetail> result { get; set; }
 	}
 

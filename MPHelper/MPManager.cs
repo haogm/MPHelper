@@ -159,7 +159,7 @@ namespace MPHelper
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, _LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<CommonExecuteResult>(resultJson);
 
-			if (resultPackage != null && resultPackage.msg.Equals("sys ok"))
+			if (resultPackage != null && resultPackage.ret == 0)
 			{
 				return true;
 			}
@@ -217,7 +217,7 @@ namespace MPHelper
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MODIFY_CATEGORY_URL, postData, _LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<ModifyContactResult>(resultJson);
 
-			if (resultPackage != null && resultPackage.result.Count > 0 && resultPackage.result[0].fakeId == fakeId)
+			if (resultPackage != null && resultPackage.ret == 0)
 			{
 				return true;
 			}
