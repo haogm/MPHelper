@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -218,11 +220,14 @@ namespace MPHelper
 		}
 
 		/// <summary>
-		/// 单用户消息发送（目前只支持文字消息）
+		/// 单用户消息发送
 		/// </summary>
 		/// <param name="fakeId">用户FakeId</param>
-		/// <param name="message">文字消息</param>
-		public static async Task<bool> SingleSendMessageAsync(string fakeId, string message)
+		/// <param name="type">消息类型</param>
+		/// <param name="content">文字消息内容</param>
+		/// <param name="fileId">图片、音频、视频消息文件ID</param>
+		/// <param name="appMsgId">图文消息ID</param>
+		public static async Task<bool> SingleSendMessageAsync(string fakeId, MPMessageType type, string content = null, string fileId = null, string appMsgId = null)
 		{
 			if (MPLoginContext.Current == null)
 			{
@@ -234,10 +239,44 @@ namespace MPHelper
 				}
 			}
 
-			var postData = string.Format("type={0}&content={1}&tofakeid={2}&imgcode={3}&token={4}&lang=zh_CN&random={5}&f=json&ajax=1&t=ajax-response",
-				"1", message, fakeId, string.Empty, MPLoginContext.Current.Token, "0.1234567890");
+			var postData = new StringBuilder();
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SINGLE_SEND_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
+			postData.AppendFormat("type={0}&tofakeid={1}&&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
+				(int)type, fakeId, MPLoginContext.Current.Token, "0.1234567890");
+
+			switch (type)
+			{
+				case MPMessageType.Text:
+					if (string.IsNullOrWhiteSpace(content))
+					{
+						throw new ArgumentNullException("content", "文字消息内容为空");
+					}
+
+					postData.AppendFormat("&content={0}", content);
+					break;
+				case MPMessageType.Image:
+				case MPMessageType.Audio:
+				case MPMessageType.Video:
+					if (string.IsNullOrWhiteSpace(fileId))
+					{
+						throw new ArgumentNullException("fileId", "文件ID为空");
+					}
+
+					postData.AppendFormat("&file_id={0}&fileid={0}", fileId);
+					break;
+				case MPMessageType.AppMsg:
+					if (string.IsNullOrWhiteSpace(appMsgId))
+					{
+						throw new ArgumentNullException("appMsgId", "图文消息ID为空");
+					}
+
+					postData.AppendFormat("&app_id={0}&appmsgid={0}", appMsgId);
+					break;
+				default:
+					break;
+			}
+
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SINGLE_SEND_MESSAGE_URL, postData.ToString(), MPLoginContext.Current.LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<SendMessageResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.base_resp != null
