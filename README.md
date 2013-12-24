@@ -16,9 +16,12 @@
 1、.Net Frameword版本: 4.5.1<br />
 2、[Json.Net](https://www.nuget.org/packages/Newtonsoft.Json) (from Nuget)<br />
 
-### 配置
-需在AppSetting中，配置公众账号用户名及密码MD5
-```xml
-<add key="MPAccount" value="公众号登录用户名" />
-<add key="MPPasswordMD5" value="公众号登录密码MD5" />
+### 使用
+在构造函数中传入公众账号用户名及密码MD5值
+```csharp
+var _account = "test@test.com";
+var _passwordMd5 = "498a5846ae15e26c96cffd8e21eb483b";
+
+var manager = new MPManager(_account, _passwordMd5);
+var contactInfo = await manager.GetContactInfoAsync(FAKE_ID);
 ```
