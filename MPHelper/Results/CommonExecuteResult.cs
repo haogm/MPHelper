@@ -1,7 +1,7 @@
 ﻿
 namespace MPHelper.Results
 {
-	internal class SetStarMassageResult
+	internal class CommonExecuteResult
 	{
 		public int ret { get; set; }
 		public string msg { get; set; }

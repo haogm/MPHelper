@@ -139,7 +139,7 @@ namespace MPHelper
 				messageId, isStar ? "1" : "0", MPLoginContext.Current.Token, "0.1234567890");
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
-			var resultPackage = JsonConvert.DeserializeObject<SetStarMassageResult>(resultJson);
+			var resultPackage = JsonConvert.DeserializeObject<CommonExecuteResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.msg.Equals("sys ok"))
 			{
@@ -218,11 +218,11 @@ namespace MPHelper
 		}
 
 		/// <summary>
-		/// 发送信息，目前只支持文字消息
+		/// 单用户消息发送（目前只支持文字消息）
 		/// </summary>
 		/// <param name="fakeId">用户FakeId</param>
 		/// <param name="message">文字消息</param>
-		public static async Task<bool> SendMessageAsync(string fakeId, string message)
+		public static async Task<bool> SingleSendMessageAsync(string fakeId, string message)
 		{
 			if (MPLoginContext.Current == null)
 			{
@@ -237,7 +237,7 @@ namespace MPHelper
 			var postData = string.Format("type={0}&content={1}&tofakeid={2}&imgcode={3}&token={4}&lang=zh_CN&random={5}&f=json&ajax=1&t=ajax-response",
 				"1", message, fakeId, string.Empty, MPLoginContext.Current.Token, "0.1234567890");
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SEND_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SINGLE_SEND_MESSAGE_URL, postData, MPLoginContext.Current.LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<SendMessageResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.base_resp != null
@@ -268,7 +268,7 @@ namespace MPHelper
 			var postData = string.Format("fakeid={0}&token={1}&lang=zh_CN&random={2}&f=json&ajax=1&t=ajax-getcontactinfo",
 				fakeId, MPLoginContext.Current.Token, "0.1234567890");
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_USERINFO_URL, postData, MPLoginContext.Current.LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_CONTACTINFO_URL, postData, MPLoginContext.Current.LoginCookie);
 			var resultPackage = JsonConvert.DeserializeObject<GetContactResult>(resultJson);
 
 			if (resultPackage != null)

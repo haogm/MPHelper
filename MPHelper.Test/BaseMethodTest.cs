@@ -67,7 +67,7 @@ namespace MPHelper.Test
 			 */
 
 			var message = "Hello world!";
-			var success = MPManager.SendMessageAsync(FAKE_ID, message).Result;
+			var success = MPManager.SingleSendMessageAsync(FAKE_ID, message).Result;
 
 			Assert.IsTrue(success);
 		}
