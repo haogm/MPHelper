@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace WX.Tools.Test
+namespace MPHelper.Test
 {
 	using NUnit.Framework;
 

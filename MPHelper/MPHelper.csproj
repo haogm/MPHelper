@@ -7,8 +7,8 @@
     <ProjectGuid>{864E9E09-F7D2-4157-924C-126CB66BFE1B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WX.Tools</RootNamespace>
-    <AssemblyName>WX.Tools</AssemblyName>
+    <RootNamespace>MPHelper</RootNamespace>
+    <AssemblyName>MPHelper</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -30,7 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\WX.Tools.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\MPHelper.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">

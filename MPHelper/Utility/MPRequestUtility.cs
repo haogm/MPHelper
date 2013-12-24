@@ -3,7 +3,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WX.Tools.Utility
+namespace MPHelper.Utility
 {
 	internal class MPRequestUtility
 	{

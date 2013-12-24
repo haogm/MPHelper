@@ -1,5 +1,5 @@
 ﻿
-namespace WX.Tools.Results
+namespace MPHelper.Results
 {
 	internal class LoginResult
 	{

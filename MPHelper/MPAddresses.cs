@@ -1,5 +1,5 @@
 ﻿
-namespace WX.Tools
+namespace MPHelper
 {
 	internal class MPAddresses
 	{

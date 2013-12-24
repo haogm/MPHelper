@@ -5,12 +5,12 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace WX.Tools
+namespace MPHelper
 {
 	using Newtonsoft.Json;
-	using WX.Tools.DTOs;
-	using WX.Tools.Results;
-	using WX.Tools.Utility;
+	using MPHelper.DTOs;
+	using MPHelper.Results;
+	using MPHelper.Utility;
 
 	/// <summary>
 	/// 操作集合类

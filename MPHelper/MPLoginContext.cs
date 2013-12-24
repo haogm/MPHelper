@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace WX.Tools
+namespace MPHelper
 {
 	internal class MPLoginContext
 	{

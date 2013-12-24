@@ -1,7 +1,7 @@
 ﻿
-namespace WX.Tools.Results
+namespace MPHelper.Results
 {
-	using WX.Tools.DTOs;
+	using MPHelper.DTOs;
 
 	internal class GetContactResult
 	{

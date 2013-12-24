@@ -1,5 +1,5 @@
 ﻿
-namespace WX.Tools.Utility
+namespace MPHelper.Utility
 {
 	using Newtonsoft.Json;
 
