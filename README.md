@@ -17,11 +17,14 @@
 2、[Json.Net](https://www.nuget.org/packages/Newtonsoft.Json) (from Nuget)<br />
 
 ### 使用
-在构造函数中传入公众账号用户名及密码MD5值
 ```csharp
+//公众账号用户名
 var _account = "test@test.com";
+//公众账号密码MD5值
 var _passwordMd5 = "498a5846ae15e26c96cffd8e21eb483b";
 
 var manager = new MPManager(_account, _passwordMd5);
-var contactInfo = await manager.GetContactInfoAsync(FAKE_ID);
+
+//获取用户信息
+var contact = await manager.GetContactInfoAsync(FAKE_ID);
 ```
