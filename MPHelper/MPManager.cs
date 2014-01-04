@@ -11,7 +11,6 @@ namespace MPHelper
 	using MPHelper.DTOs;
 	using MPHelper.Results;
 	using MPHelper.Utility;
-	using Newtonsoft.Json;
 
 	/// <summary>
 	/// 操作集合类
@@ -61,7 +60,7 @@ namespace MPHelper
 
 			var cookie = new CookieContainer();
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LOGIN_URL, postData, cookie);
-			var resultPackage = JsonConvert.DeserializeObject<LoginResult>(resultJson);
+			var resultPackage = JsonHelper.Deserialize<LoginResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.ErrMsg.Length > 0)
 			{
@@ -157,7 +156,7 @@ namespace MPHelper
 				messageId, isStar ? "1" : "0", _LoginContext[_mpAccount].Token);
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, _LoginContext[_mpAccount].LoginCookie);
-			var resultPackage = JsonConvert.DeserializeObject<CommonExecuteResult>(resultJson);
+			var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.ret == 0)
 			{
@@ -215,7 +214,7 @@ namespace MPHelper
 				cateId, fakeId, _LoginContext[_mpAccount].Token);
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MODIFY_CATEGORY_URL, postData, _LoginContext[_mpAccount].LoginCookie);
-			var resultPackage = JsonConvert.DeserializeObject<ModifyContactResult>(resultJson);
+			var resultPackage = JsonHelper.Deserialize<ModifyContactResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.ret == 0)
 			{
@@ -240,7 +239,7 @@ namespace MPHelper
 				fakeId, _LoginContext[_mpAccount].Token);
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_CONTACTINFO_URL, postData, _LoginContext[_mpAccount].LoginCookie);
-			var resultPackage = JsonConvert.DeserializeObject<GetContactResult>(resultJson);
+			var resultPackage = JsonHelper.Deserialize<GetContactResult>(resultJson);
 
 			if (resultPackage != null)
 			{
@@ -305,7 +304,7 @@ namespace MPHelper
 			}
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SINGLE_SEND_MESSAGE_URL, postData.ToString(), _LoginContext[_mpAccount].LoginCookie);
-			var resultPackage = JsonConvert.DeserializeObject<SendMessageResult>(resultJson);
+			var resultPackage = JsonHelper.Deserialize<SendMessageResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.base_resp != null
 				&& resultPackage.base_resp.ret == 0)
@@ -381,7 +380,7 @@ namespace MPHelper
 			}
 
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MASS_SEND__MESSAGE_URL, postData.ToString(), _LoginContext[_mpAccount].LoginCookie);
-			var resultPackage = JsonConvert.DeserializeObject<CommonExecuteResult>(resultJson);
+			var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.ret == 0)
 			{

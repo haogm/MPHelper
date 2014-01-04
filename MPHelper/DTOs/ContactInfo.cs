@@ -9,7 +9,7 @@ namespace MPHelper.DTOs
 		/// <summary>
 		/// FakeId
 		/// </summary>
-		public int fake_id { get; set; }
+		public long fake_id { get; set; }
 		
 		/// <summary>
 		/// 昵称
