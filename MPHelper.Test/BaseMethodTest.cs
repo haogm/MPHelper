@@ -48,6 +48,15 @@ namespace MPHelper.Test
 		}
 
 		[Test]
+		public void GetMessageListByKeywordTest()
+		{
+			var messages = _MPManager.GetMessageListByKeywordAsync("010227", 20).Result;
+
+			Assert.NotNull(messages);
+			Assert.IsTrue(messages.Count() > 0);
+		}
+
+		[Test]
 		public void GetStarMessageListTest()
 		{
 			var messages = _MPManager.GetStarMessageListAsync(1).Result;
@@ -77,14 +86,16 @@ namespace MPHelper.Test
 			 * 可先给公众账号发送一条消息，确保突破24小时限制。
 			 */
 
+			var success = true;
+
 			var message = "SingleSendMessageTest: test from MPHelper! 中文消息测试！";
-			var success = _MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Text, message).Result;
+			success = _MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Text, message).Result;
 
 			//var fileId = "10013378";
-			//var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, fileId).Result;
+			//success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, fileId).Result;
 
 			//var appMsgId = "10013374";
-			//var success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.AppMsg, appMsgId).Result;
+			//success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.AppMsg, appMsgId).Result;
 
 			Assert.IsTrue(success);
 		}

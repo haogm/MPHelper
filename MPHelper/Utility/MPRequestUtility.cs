@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace MPHelper.Utility
 {
@@ -28,6 +29,7 @@ namespace MPHelper.Utility
 				request.Method = "POST";
 				request.Referer = "https://mp.weixin.qq.com/";
 				request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
+				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 				request.Timeout = 5000;
 
 				using (var requestStream = request.GetRequestStream())
@@ -59,16 +61,18 @@ namespace MPHelper.Utility
 				request.CookieContainer = cookie;
 				request.ContentType = "application/x-www-form-urlencoded";
 				request.Headers.Add("Accept-Encoding", "gzip,deflate,sdch");
+				request.Headers.Add("Accept-Language", "zh-cn");
 				request.Host = "mp.weixin.qq.com";
 				request.KeepAlive = true;
 				request.Method = "GET";
 				request.Referer = "https://mp.weixin.qq.com/";
 				request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
+				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 				request.Timeout = 5000;
 
 				using (var response = (HttpWebResponse)request.GetResponse())
 				{
-					using (var streamReader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
+					using (var streamReader = new StreamReader(response.GetResponseStream(), encoding ?? Encoding.UTF8))
 					{
 						return await streamReader.ReadToEndAsync();
 					}

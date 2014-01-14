@@ -6,7 +6,7 @@ namespace MPHelper
 		/// <summary>
 		/// 登录
 		/// </summary>
-		public const string LOGIN_URL = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
+		public const string LOGIN_URL = "https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 
 		/// <summary>
 		/// 更改用户分组
@@ -32,6 +32,11 @@ namespace MPHelper
 		/// 所有用户消息列表
 		/// </summary>
 		public const string ALL_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&count={0}&day={1}&token={2}&lang=zh_CN";
+
+		/// <summary>
+		/// 消息列表（关键字检索）
+		/// </summary>
+		public const string KEYWORD_MESSAGE_LIST_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/message?t=message/list&action=search&keyword={0}&count={1}&token={2}&lang=zh_CN";
 
 		/// <summary>
 		/// 单个用户对话消息列表

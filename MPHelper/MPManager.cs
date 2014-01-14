@@ -119,6 +119,34 @@ namespace MPHelper
 		}
 
 		/// <summary>
+		/// 根据关键字检索消息列表
+		/// </summary>
+		/// <param name="keyword">关键字</param>
+		/// <param name="count">消息条数</param>
+		public async Task<IList<MessageItem>> GetMessageListByKeywordAsync(string keyword, int count = 20)
+		{
+			if (!await this.LoginAsync())
+			{
+				return null;
+			}
+
+			if (string.IsNullOrWhiteSpace(keyword))
+			{
+				return null;
+			}
+
+			if (count < 1 || count > 100)
+			{
+				count = 20;
+			}
+
+			var url = string.Format(MPAddresses.KEYWORD_MESSAGE_LIST_URL_FORMAT,
+				keyword, count, _LoginContext[_mpAccount].Token);
+
+			return await GetMessageListAsync(url);
+		}
+
+		/// <summary>
 		/// 获取星标消息列表
 		/// </summary>
 		/// <param name="count">消息条数</param>
