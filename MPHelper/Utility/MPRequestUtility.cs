@@ -30,7 +30,7 @@ namespace MPHelper.Utility
 				request.Referer = "https://mp.weixin.qq.com/";
 				request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
 				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-				request.Timeout = 5000;
+				//request.Timeout = 5000;
 
 				using (var requestStream = request.GetRequestStream())
 				{
@@ -68,7 +68,7 @@ namespace MPHelper.Utility
 				request.Referer = "https://mp.weixin.qq.com/";
 				request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
 				request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-				request.Timeout = 5000;
+				//request.Timeout = 5000;
 
 				using (var response = (HttpWebResponse)request.GetResponse())
 				{
