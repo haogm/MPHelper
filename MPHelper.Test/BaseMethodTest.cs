@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace MPHelper.Test
 {
 	using NUnit.Framework;
 
-    public class BaseMethodTest
-    {
+	public class BaseMethodTest
+	{
 		const string MP_ACCOUNT = "010227leo@gmail.com";
 		const string MP_PASSWORD_MD5 = "498a5846ae15e26c96cffd8e21eb483b";
 		const string FAKE_ID = "126185600";
@@ -122,5 +121,6 @@ namespace MPHelper.Test
 
 			Assert.IsTrue(success);
 		}
-    }
+
+	}
 }
