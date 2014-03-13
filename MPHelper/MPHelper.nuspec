@@ -6,7 +6,10 @@
     <title>MPHelper</title> 
     <authors>l3oz</authors> 
     <projectUrl>https://github.com/010227leo/MPHelper</projectUrl> 
-    <description>微信公众平台助手</description> 
+    <description>微信公众平台助手</description>
+		<dependencies>
+			<dependency id="Newtonsoft.Json" version="5.0.1" />
+		</dependencies>
   </metadata> 
   <files> 
     <file src="bin\Release\MPHelper.dll" target="lib\net45" />
