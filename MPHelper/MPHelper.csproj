@@ -64,10 +64,18 @@
     <Compile Include="Utility\MPRequestUtility.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MPHelper.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>IF NOT "$(ConfigurationName)"=="Release" EXIT /B 0 
+IF NOT EXIST $(SolutionDir)ReleasePackages MD $(SolutionDir)ReleasePackages 
+$(SolutionDir).nuget\NuGet.exe Pack $(ProjectDir)MPHelper.nuspec -o $(SolutionDir)ReleasePackages\</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?> 
+<package> 
+  <metadata> 
+    <id>MPHelper</id> 
+    <version>1.0.0.1</version> 
+    <title>MPHelper</title> 
+    <authors>l3oz</authors> 
+    <projectUrl>https://github.com/010227leo/MPHelper</projectUrl> 
+    <description>微信公众平台助手</description> 
+  </metadata> 
+  <files> 
+    <file src="bin\Release\MPHelper.dll" target="lib\net45" />
+  </files> 
+</package> 
