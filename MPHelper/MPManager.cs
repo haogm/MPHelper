@@ -62,9 +62,9 @@ namespace MPHelper
 			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LOGIN_URL, postData, cookie);
 			var resultPackage = JsonHelper.Deserialize<LoginResult>(resultJson);
 
-			if (resultPackage != null && resultPackage.ErrMsg.Length > 0)
+			if (resultPackage != null && resultPackage.base_resp != null && resultPackage.base_resp.ret == 0)
 			{
-				var token = resultPackage.ErrMsg.Split(new char[] { '&' })[2].Split(new char[] { '=' })[1];
+				var token = resultPackage.redirect_url.Split(new char[] { '&' })[2].Split(new char[] { '=' })[1];
 
 				if (!string.IsNullOrWhiteSpace(token))
 				{
