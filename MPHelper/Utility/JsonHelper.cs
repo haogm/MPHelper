@@ -14,14 +14,7 @@
 			if (string.IsNullOrWhiteSpace(json))
 				return default(T);
 
-			try
-			{
-				return JsonConvert.DeserializeObject<T>(json);
-			}
-			catch
-			{
-				return default(T);
-			}
+			return JsonConvert.DeserializeObject<T>(json);
 		}
 	}
 }
