@@ -53,5 +53,9 @@ namespace MPHelper
 		/// </summary>
 		public const string SET_START_MESSAGE_URL = "https://mp.weixin.qq.com/cgi-bin/setstarmessage";
 
+		/// <summary>
+		/// 文件下载
+		/// </summary>
+		public const string DOWNLOAD_FILE_URL_FORMAT = "https://mp.weixin.qq.com/cgi-bin/downloadfile?msgid={0}&source=&token={1}";
 	}
 }

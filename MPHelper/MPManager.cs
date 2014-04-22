@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -418,6 +419,24 @@ namespace MPHelper
 			}
 
 			return false;
+		}
+
+		/// <summary>
+		/// 获取后台文件（音频、图片）
+		/// </summary>
+		/// <param name="msgId">消息ID</param>
+		/// <returns></returns>
+		public byte[] GetDonwloadFileBytes(int msgId)
+		{
+			if (!this.LoginAsync().Result)
+			{
+				return null;
+			}
+
+			var url = string.Format(MPAddresses.DOWNLOAD_FILE_URL_FORMAT,
+				msgId, _LoginContext[_mpAccount].Token);
+
+			return MPRequestUtility.GetDonwloadFileBytes(url, _LoginContext[_mpAccount].LoginCookie);
 		}
 
 		#region private
