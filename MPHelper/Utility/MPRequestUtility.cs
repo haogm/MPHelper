@@ -2,11 +2,10 @@
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace MPHelper.Utility
 {
-	internal class MPRequestUtility
+	internal static class MPRequestUtility
 	{
 		public static async Task<string> PostAsync(string url, string postData, CookieContainer cookie, Encoding encoding = null)
 		{

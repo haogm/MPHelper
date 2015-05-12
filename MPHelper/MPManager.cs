@@ -1,48 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using MPHelper.DTOs;
+using MPHelper.Results;
+using MPHelper.Utility;
 
 namespace MPHelper
 {
-	using MPHelper.DTOs;
-	using MPHelper.Results;
-	using MPHelper.Utility;
-
 	/// <summary>
 	/// 操作集合类
 	/// </summary>
 	public class MPManager
 	{
-		private static readonly object _locker = new object();
-		private static Dictionary<string, MPLoginContext> _LoginContext = new Dictionary<string, MPLoginContext>();
+		private static readonly object LoginLocker = new object();
+		private static readonly Dictionary<string, MPLoginContext> LoginContext = new Dictionary<string, MPLoginContext>();
 
-		private string _mpAccount;
-		private string _mpPasswordMD5;
+		private readonly string _mpAccount;
+		private readonly string _mpPasswordMd5;
 
 		/// <summary>
 		/// MPManager
 		/// </summary>
 		/// <param name="mpAccount">公众账号登录用户名</param>
-		/// <param name="mpPasswordMD5">公众账号登录密码MD5值</param>
-		public MPManager(string mpAccount, string mpPasswordMD5)
+		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
+		public MPManager(string mpAccount, string mpPasswordMd5)
 		{
 			if (string.IsNullOrWhiteSpace(mpAccount))
-			{
 				throw new ArgumentNullException("mpAccount");
-			}
 
-			if (string.IsNullOrWhiteSpace(mpPasswordMD5))
-			{
-				throw new ArgumentNullException("mpPasswordMD5");
-			}
+			if (string.IsNullOrWhiteSpace(mpPasswordMd5))
+				throw new ArgumentNullException("mpPasswordMd5");
 
 			_mpAccount = mpAccount;
-			_mpPasswordMD5 = mpPasswordMD5;
+			_mpPasswordMd5 = mpPasswordMd5;
 		}
 
 		/// <summary>
@@ -50,39 +44,35 @@ namespace MPHelper
 		/// </summary>
 		private async Task<bool> LoginAsync()
 		{
-			if (_LoginContext.ContainsKey(_mpAccount) && _LoginContext[_mpAccount].IsValid())
-			{
+			if (LoginContext.ContainsKey(_mpAccount) && LoginContext[_mpAccount].IsValid())
 				return true;
-			}
 
 			var success = false;
 			var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json",
-				HttpUtility.UrlEncode(_mpAccount), _mpPasswordMD5);
+				HttpUtility.UrlEncode(_mpAccount), _mpPasswordMd5);
 
 			var cookie = new CookieContainer();
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LOGIN_URL, postData, cookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LoginUrl, postData, cookie);
 			var resultPackage = JsonHelper.Deserialize<LoginResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.base_resp != null && resultPackage.base_resp.ret == 0)
 			{
-				var token = resultPackage.redirect_url.Split(new char[] { '&' })[2].Split(new char[] { '=' })[1];
+				var token = resultPackage.redirect_url.Split('&')[2].Split('=')[1];
 
 				if (!string.IsNullOrWhiteSpace(token))
 				{
-					if (!_LoginContext.ContainsKey(_mpAccount))
+					if (!LoginContext.ContainsKey(_mpAccount))
 					{
-						lock (_locker)
+						lock (LoginLocker)
 						{
-							if (!_LoginContext.ContainsKey(_mpAccount))
-							{
-								_LoginContext.Add(_mpAccount, new MPLoginContext());
-							}
+							if (!LoginContext.ContainsKey(_mpAccount))
+								LoginContext.Add(_mpAccount, new MPLoginContext());
 						}
 					}
 
-					_LoginContext[_mpAccount].Token = token;
-					_LoginContext[_mpAccount].LoginCookie = cookie;
-					_LoginContext[_mpAccount].CreateDate = DateTime.Now;
+					LoginContext[_mpAccount].Token = token;
+					LoginContext[_mpAccount].LoginCookie = cookie;
+					LoginContext[_mpAccount].CreateDate = DateTime.Now;
 
 					success = true;
 				}
@@ -98,23 +88,17 @@ namespace MPHelper
 		/// <param name="day">0：今天；1：昨天；以此类推，后台最多保存5天数据，默认全部消息</param>
 		public async Task<IList<MessageItem>> GetAllMessageListAsync(int count = 20, int day = 7)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return null;
-			}
 
 			if (count < 1 || count > 100)
-			{
 				count = 20;
-			}
 
 			if (day < 0 || day > 7)
-			{
 				day = 7;
-			}
 
-			var url = string.Format(MPAddresses.ALL_MESSAGE_LIST_URL_FORMAT,
-				count, day, _LoginContext[_mpAccount].Token);
+			var url = string.Format(MPAddresses.AllMessageListUrlFormat,
+				count, day, LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
 		}
@@ -126,23 +110,17 @@ namespace MPHelper
 		/// <param name="count">消息条数</param>
 		public async Task<IList<MessageItem>> GetMessageListByKeywordAsync(string keyword, int count = 20)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return null;
-			}
 
 			if (string.IsNullOrWhiteSpace(keyword))
-			{
 				return null;
-			}
 
 			if (count < 1 || count > 100)
-			{
 				count = 20;
-			}
 
-			var url = string.Format(MPAddresses.KEYWORD_MESSAGE_LIST_URL_FORMAT,
-				keyword, count, _LoginContext[_mpAccount].Token);
+			var url = string.Format(MPAddresses.KeywordMessageListUrlFormat,
+				keyword, count, LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
 		}
@@ -153,18 +131,14 @@ namespace MPHelper
 		/// <param name="count">消息条数</param>
 		public async Task<IList<MessageItem>> GetStarMessageListAsync(int count = 20)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return null;
-			}
 
 			if (count < 1 || count > 100)
-			{
 				count = 20;
-			}
 
-			var url = string.Format(MPAddresses.STAR_MESSAGE_LIST_URL_FORMAT,
-				count, _LoginContext[_mpAccount].Token);
+			var url = string.Format(MPAddresses.StarMessageListUrlFormat,
+				count, LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
 		}
@@ -176,23 +150,16 @@ namespace MPHelper
 		/// <param name="isStar">是否为星标</param>
 		public async Task<bool> SetStarMessageAsync(string messageId, bool isStar)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return false;
-			}
 
 			var postData = string.Format("msgid={0}&value={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-setstarmessage",
-				messageId, isStar ? "1" : "0", _LoginContext[_mpAccount].Token);
+				messageId, isStar ? "1" : "0", LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SET_START_MESSAGE_URL, postData, _LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SetStartMessageUrl, postData, LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
-			if (resultPackage != null && resultPackage.ret == 0)
-			{
-				return true;
-			}
-
-			return false;
+			return resultPackage != null && resultPackage.ret == 0;
 		}
 
 		/// <summary>
@@ -201,15 +168,13 @@ namespace MPHelper
 		/// <param name="fakeId">用户FakeId</param>
 		public async Task<IList<MessageItem>> GetSingleSendMessageListAsync(string fakeId)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return null;
-			}
 
-			var url = string.Format(MPAddresses.SINGLE_SEND_MESSAGE_LIST_URL_FORMAT,
-				fakeId, _LoginContext[_mpAccount].Token);
+			var url = string.Format(MPAddresses.SingleSendMessageListUrlFormat,
+				fakeId, LoginContext[_mpAccount].Token);
 
-			var htmlContent = await MPRequestUtility.GetAsync(url, _LoginContext[_mpAccount].LoginCookie);
+			var htmlContent = await MPRequestUtility.GetAsync(url, LoginContext[_mpAccount].LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{
@@ -217,11 +182,7 @@ namespace MPHelper
 				var match = regex.Match(htmlContent);
 
 				if (match.Groups.Count > 0)
-				{
-					var listJson = string.Format("[{0}]", match.Groups[0].Value);
-
-					return JsonHelper.Deserialize<List<MessageItem>>(listJson);
-				}
+					return JsonHelper.Deserialize<List<MessageItem>>(string.Format("[{0}]", match.Groups[0].Value));
 			}
 
 			return null;
@@ -234,23 +195,16 @@ namespace MPHelper
 		/// <param name="cateId">分组ID</param>
 		public async Task<bool> ChangeCategoryAsync(string fakeId, string cateId)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return false;
-			}
 
 			var postData = string.Format("contacttype={0}&tofakeidlist={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&action=modifycontacts&t=ajax-putinto-group",
-				cateId, fakeId, _LoginContext[_mpAccount].Token);
+				cateId, fakeId, LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MODIFY_CATEGORY_URL, postData, _LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.ModifyCategoryUrl, postData, LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<ModifyContactResult>(resultJson);
 
-			if (resultPackage != null && resultPackage.ret == 0)
-			{
-				return true;
-			}
-
-			return false;
+			return resultPackage != null && resultPackage.ret == 0;
 		}
 
 		/// <summary>
@@ -259,23 +213,16 @@ namespace MPHelper
 		/// <param name="fakeId">用户FakeId</param>
 		public async Task<ContactInfo> GetContactInfoAsync(string fakeId)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return null;
-			}
 
 			var postData = string.Format("fakeid={0}&token={1}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-getcontactinfo",
-				fakeId, _LoginContext[_mpAccount].Token);
+				fakeId, LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GET_CONTACTINFO_URL, postData, _LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GetContactinfoUrl, postData, LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<GetContactResult>(resultJson);
 
-			if (resultPackage != null)
-			{
-				return resultPackage.contact_info;
-			}
-
-			return null;
+			return resultPackage != null ? resultPackage.contact_info : null;
 		}
 
 		/// <summary>
@@ -290,23 +237,19 @@ namespace MPHelper
 		/// </param>
 		public async Task<bool> SingleSendMessageAsync(string fakeId, MPMessageType type, string value)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return false;
-			}
 
 			var postData = new StringBuilder();
 
 			postData.AppendFormat("type={0}&tofakeid={1}&&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
-				(int)type, fakeId, _LoginContext[_mpAccount].Token);
+				(int)type, fakeId, LoginContext[_mpAccount].Token);
 
 			switch (type)
 			{
 				case MPMessageType.Text:
 					if (string.IsNullOrWhiteSpace(value))
-					{
 						throw new ArgumentNullException("value", "文字消息内容为空");
-					}
 
 					postData.AppendFormat("&content={0}", HttpUtility.UrlEncode(value, Encoding.UTF8));
 					break;
@@ -314,34 +257,23 @@ namespace MPHelper
 				case MPMessageType.Audio:
 				case MPMessageType.Video:
 					if (string.IsNullOrWhiteSpace(value))
-					{
 						throw new ArgumentNullException("value", "文件ID为空");
-					}
 
 					postData.AppendFormat("&file_id={0}&fileid={0}", value);
 					break;
 				case MPMessageType.AppMsg:
 					if (string.IsNullOrWhiteSpace(value))
-					{
 						throw new ArgumentNullException("value", "图文消息ID为空");
-					}
 
 					postData.AppendFormat("&app_id={0}&appmsgid={0}", value);
 					break;
-				default:
-					break;
 			}
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SINGLE_SEND_MESSAGE_URL, postData.ToString(), _LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(
+				MPAddresses.SingleSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<SendMessageResult>(resultJson);
 
-			if (resultPackage != null && resultPackage.base_resp != null
-				&& resultPackage.base_resp.ret == 0)
-			{
-				return true;
-			}
-
-			return false;
+			return resultPackage != null && resultPackage.base_resp != null && resultPackage.base_resp.ret == 0;
 		}
 
 		/// <summary>
@@ -362,29 +294,26 @@ namespace MPHelper
 		public async Task<bool> MassSendMessageAsync(MPMessageType type, string value, string groupId = "-1", int gender = 0,
 			string country = null, string province = null, string city = null)
 		{
-			if (!await this.LoginAsync())
-			{
+			if (!await LoginAsync())
 				return false;
-			}
 
 			var postData = new StringBuilder();
 
-			postData.AppendFormat("type={0}&groupid={1}&sex={2}&country={3}&province={4}&city={5}&token={6}&synctxweibo=0&synctxnews=0&imgcode=&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
-				(int)type, 
+			postData.AppendFormat(
+				"type={0}&groupid={1}&sex={2}&country={3}&province={4}&city={5}&token={6}&synctxweibo=0&synctxnews=0&imgcode=&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
+				(int) type,
 				string.IsNullOrWhiteSpace(groupId) ? "-1" : groupId,
 				gender,
 				string.IsNullOrWhiteSpace(country) ? string.Empty : HttpUtility.UrlEncode(country, Encoding.UTF8),
 				string.IsNullOrWhiteSpace(province) ? string.Empty : HttpUtility.UrlEncode(province, Encoding.UTF8),
 				string.IsNullOrWhiteSpace(city) ? string.Empty : HttpUtility.UrlEncode(city, Encoding.UTF8),
-				_LoginContext[_mpAccount].Token);
+				LoginContext[_mpAccount].Token);
 
 			switch (type)
 			{
 				case MPMessageType.Text:
 					if (string.IsNullOrWhiteSpace(value))
-					{
 						throw new ArgumentNullException("value", "文字消息内容为空");
-					}
 
 					postData.AppendFormat("&content={0}", HttpUtility.UrlEncode(value, Encoding.UTF8));
 					break;
@@ -392,33 +321,23 @@ namespace MPHelper
 				case MPMessageType.Audio:
 				case MPMessageType.Video:
 					if (string.IsNullOrWhiteSpace(value))
-					{
 						throw new ArgumentNullException("value", "文件ID为空");
-					}
 
 					postData.AppendFormat("&fileid={0}", value);
 					break;
 				case MPMessageType.AppMsg:
 					if (string.IsNullOrWhiteSpace(value))
-					{
 						throw new ArgumentNullException("value", "图文消息ID为空");
-					}
 
 					postData.AppendFormat("&appmsgid={0}", value);
 					break;
-				default:
-					break;
 			}
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.MASS_SEND__MESSAGE_URL, postData.ToString(), _LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MPRequestUtility.PostAsync(
+				MPAddresses.MassSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
-			if (resultPackage != null && resultPackage.ret == 0)
-			{
-				return true;
-			}
-
-			return false;
+			return resultPackage != null && resultPackage.ret == 0;
 		}
 
 		/// <summary>
@@ -428,22 +347,19 @@ namespace MPHelper
 		/// <returns></returns>
 		public byte[] GetDonwloadFileBytes(int msgId)
 		{
-			if (!this.LoginAsync().Result)
-			{
+			if (!LoginAsync().Result)
 				return null;
-			}
 
-			var url = string.Format(MPAddresses.DOWNLOAD_FILE_URL_FORMAT,
-				msgId, _LoginContext[_mpAccount].Token);
+			var url = string.Format(MPAddresses.DownloadFileUrlFormat, msgId, LoginContext[_mpAccount].Token);
 
-			return MPRequestUtility.GetDonwloadFileBytes(url, _LoginContext[_mpAccount].LoginCookie);
+			return MPRequestUtility.GetDonwloadFileBytes(url, LoginContext[_mpAccount].LoginCookie);
 		}
 
 		#region private
 
 		private async Task<IList<MessageItem>> GetMessageListAsync(string url)
 		{
-			var htmlContent = await MPRequestUtility.GetAsync(url, _LoginContext[_mpAccount].LoginCookie);
+			var htmlContent = await MPRequestUtility.GetAsync(url, LoginContext[_mpAccount].LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{
@@ -451,11 +367,7 @@ namespace MPHelper
 				var match = regex.Match(htmlContent);
 
 				if (match.Groups.Count > 0)
-				{
-					var listJson = string.Format("[{0}]", match.Groups[0].Value);
-
-					return JsonHelper.Deserialize<List<MessageItem>>(listJson);
-				}
+					return JsonHelper.Deserialize<List<MessageItem>>(string.Format("[{0}]", match.Groups[0].Value));
 			}
 
 			return null;

@@ -1,8 +1,7 @@
-﻿
+﻿using MPHelper.DTOs;
+
 namespace MPHelper.Results
 {
-	using MPHelper.DTOs;
-
 	internal class GetContactResult
 	{
 		public BaseResp base_resp { get; set; }

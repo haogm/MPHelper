@@ -11,10 +11,7 @@
 
 		public static T Deserialize<T>(string json)
 		{
-			if (string.IsNullOrWhiteSpace(json))
-				return default(T);
-
-			return JsonConvert.DeserializeObject<T>(json);
+			return string.IsNullOrWhiteSpace(json) ? default(T) : JsonConvert.DeserializeObject<T>(json);
 		}
 	}
 }

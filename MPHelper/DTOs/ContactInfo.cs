@@ -1,5 +1,4 @@
-﻿
-namespace MPHelper.DTOs
+﻿namespace MPHelper.DTOs
 {
 	/// <summary>
 	/// 联系人对象
