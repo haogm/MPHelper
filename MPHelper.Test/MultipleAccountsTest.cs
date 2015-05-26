@@ -11,14 +11,14 @@ namespace MPHelper.Test
 		const string MpBPasswordMd5 = "53e3ffe2aba20ce80453e3fe3b824928";
 		const string FakeId = "126185600";
 
-		private MPManager _mpAManager;
-		private MPManager _mpBManager;
+		private MpManager _mpAManager;
+		private MpManager _mpBManager;
 
 		[SetUp]
 		protected void TestSetUp()
 		{
-			_mpAManager = new MPManager(MpAAccount, MpAPasswordMd5);
-			_mpBManager = new MPManager(MpBAccount, MpBPasswordMd5);
+			_mpAManager = new MpManager(MpAAccount, MpAPasswordMd5);
+			_mpBManager = new MpManager(MpBAccount, MpBPasswordMd5);
 		}
 
 
@@ -26,8 +26,8 @@ namespace MPHelper.Test
 		public void SingleSendMessageTest()
 		{
 			const string message = "MultipleAccountsTest.SingleSendMessageTest: ok！";
-			var successA = _mpAManager.SingleSendMessageAsync(FakeId, MPMessageType.Text, message).Result;
-			var successB = _mpBManager.SingleSendMessageAsync(FakeId, MPMessageType.Text, message).Result;
+			var successA = _mpAManager.SingleSendMessageAsync(FakeId, MpMessageType.Text, message).Result;
+			var successB = _mpBManager.SingleSendMessageAsync(FakeId, MpMessageType.Text, message).Result;
 
 			Assert.IsTrue(successA);
 			Assert.IsTrue(successB);

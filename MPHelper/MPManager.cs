@@ -14,10 +14,10 @@ namespace MPHelper
 	/// <summary>
 	/// 操作集合类
 	/// </summary>
-	public class MPManager
+	public class MpManager
 	{
 		private static readonly object LoginLocker = new object();
-		private static readonly Dictionary<string, MPLoginContext> LoginContext = new Dictionary<string, MPLoginContext>();
+		private static readonly Dictionary<string, MpLoginContext> LoginContext = new Dictionary<string, MpLoginContext>();
 
 		private readonly string _mpAccount;
 		private readonly string _mpPasswordMd5;
@@ -27,7 +27,7 @@ namespace MPHelper
 		/// </summary>
 		/// <param name="mpAccount">公众账号登录用户名</param>
 		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
-		public MPManager(string mpAccount, string mpPasswordMd5)
+		public MpManager(string mpAccount, string mpPasswordMd5)
 		{
 			if (string.IsNullOrWhiteSpace(mpAccount))
 				throw new ArgumentNullException("mpAccount");
@@ -52,7 +52,7 @@ namespace MPHelper
 				HttpUtility.UrlEncode(_mpAccount), _mpPasswordMd5);
 
 			var cookie = new CookieContainer();
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.LoginUrl, postData, cookie);
+			var resultJson = await MpRequestUtility.PostAsync(MpAddresses.LoginUrl, postData, cookie);
 			var resultPackage = JsonHelper.Deserialize<LoginResult>(resultJson);
 
 			if (resultPackage != null && resultPackage.base_resp != null && resultPackage.base_resp.ret == 0)
@@ -66,7 +66,7 @@ namespace MPHelper
 						lock (LoginLocker)
 						{
 							if (!LoginContext.ContainsKey(_mpAccount))
-								LoginContext.Add(_mpAccount, new MPLoginContext());
+								LoginContext.Add(_mpAccount, new MpLoginContext());
 						}
 					}
 
@@ -97,7 +97,7 @@ namespace MPHelper
 			if (day < 0 || day > 7)
 				day = 7;
 
-			var url = string.Format(MPAddresses.AllMessageListUrlFormat,
+			var url = string.Format(MpAddresses.AllMessageListUrlFormat,
 				count, day, LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
@@ -119,7 +119,7 @@ namespace MPHelper
 			if (count < 1 || count > 100)
 				count = 20;
 
-			var url = string.Format(MPAddresses.KeywordMessageListUrlFormat,
+			var url = string.Format(MpAddresses.KeywordMessageListUrlFormat,
 				keyword, count, LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
@@ -137,7 +137,7 @@ namespace MPHelper
 			if (count < 1 || count > 100)
 				count = 20;
 
-			var url = string.Format(MPAddresses.StarMessageListUrlFormat,
+			var url = string.Format(MpAddresses.StarMessageListUrlFormat,
 				count, LoginContext[_mpAccount].Token);
 
 			return await GetMessageListAsync(url);
@@ -156,7 +156,7 @@ namespace MPHelper
 			var postData = string.Format("msgid={0}&value={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-setstarmessage",
 				messageId, isStar ? "1" : "0", LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.SetStartMessageUrl, postData, LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MpRequestUtility.PostAsync(MpAddresses.SetStartMessageUrl, postData, LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
 			return resultPackage != null && resultPackage.ret == 0;
@@ -171,10 +171,10 @@ namespace MPHelper
 			if (!await LoginAsync())
 				return null;
 
-			var url = string.Format(MPAddresses.SingleSendMessageListUrlFormat,
+			var url = string.Format(MpAddresses.SingleSendMessageListUrlFormat,
 				fakeId, LoginContext[_mpAccount].Token);
 
-			var htmlContent = await MPRequestUtility.GetAsync(url, LoginContext[_mpAccount].LoginCookie);
+			var htmlContent = await MpRequestUtility.GetAsync(url, LoginContext[_mpAccount].LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{
@@ -201,7 +201,7 @@ namespace MPHelper
 			var postData = string.Format("contacttype={0}&tofakeidlist={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&action=modifycontacts&t=ajax-putinto-group",
 				cateId, fakeId, LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.ModifyCategoryUrl, postData, LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MpRequestUtility.PostAsync(MpAddresses.ModifyCategoryUrl, postData, LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<ModifyContactResult>(resultJson);
 
 			return resultPackage != null && resultPackage.ret == 0;
@@ -219,7 +219,7 @@ namespace MPHelper
 			var postData = string.Format("fakeid={0}&token={1}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-getcontactinfo",
 				fakeId, LoginContext[_mpAccount].Token);
 
-			var resultJson = await MPRequestUtility.PostAsync(MPAddresses.GetContactinfoUrl, postData, LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MpRequestUtility.PostAsync(MpAddresses.GetContactinfoUrl, postData, LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<GetContactResult>(resultJson);
 
 			return resultPackage != null ? resultPackage.contact_info : null;
@@ -235,7 +235,7 @@ namespace MPHelper
 		/// 图片、音频、视频消息：文件ID; 
 		/// 图文消息：消息ID; 
 		/// </param>
-		public async Task<bool> SingleSendMessageAsync(string fakeId, MPMessageType type, string value)
+		public async Task<bool> SingleSendMessageAsync(string fakeId, MpMessageType type, string value)
 		{
 			if (!await LoginAsync())
 				return false;
@@ -247,21 +247,21 @@ namespace MPHelper
 
 			switch (type)
 			{
-				case MPMessageType.Text:
+				case MpMessageType.Text:
 					if (string.IsNullOrWhiteSpace(value))
 						throw new ArgumentNullException("value", "文字消息内容为空");
 
 					postData.AppendFormat("&content={0}", HttpUtility.UrlEncode(value, Encoding.UTF8));
 					break;
-				case MPMessageType.Image:
-				case MPMessageType.Audio:
-				case MPMessageType.Video:
+				case MpMessageType.Image:
+				case MpMessageType.Audio:
+				case MpMessageType.Video:
 					if (string.IsNullOrWhiteSpace(value))
 						throw new ArgumentNullException("value", "文件ID为空");
 
 					postData.AppendFormat("&file_id={0}&fileid={0}", value);
 					break;
-				case MPMessageType.AppMsg:
+				case MpMessageType.AppMsg:
 					if (string.IsNullOrWhiteSpace(value))
 						throw new ArgumentNullException("value", "图文消息ID为空");
 
@@ -269,8 +269,8 @@ namespace MPHelper
 					break;
 			}
 
-			var resultJson = await MPRequestUtility.PostAsync(
-				MPAddresses.SingleSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MpRequestUtility.PostAsync(
+				MpAddresses.SingleSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<SendMessageResult>(resultJson);
 
 			return resultPackage != null && resultPackage.base_resp != null && resultPackage.base_resp.ret == 0;
@@ -291,7 +291,7 @@ namespace MPHelper
 		/// <param name="province">省</param>
 		/// <param name="city">市</param>
 		/// <returns></returns>
-		public async Task<bool> MassSendMessageAsync(MPMessageType type, string value, string groupId = "-1", int gender = 0,
+		public async Task<bool> MassSendMessageAsync(MpMessageType type, string value, string groupId = "-1", int gender = 0,
 			string country = null, string province = null, string city = null)
 		{
 			if (!await LoginAsync())
@@ -311,21 +311,21 @@ namespace MPHelper
 
 			switch (type)
 			{
-				case MPMessageType.Text:
+				case MpMessageType.Text:
 					if (string.IsNullOrWhiteSpace(value))
 						throw new ArgumentNullException("value", "文字消息内容为空");
 
 					postData.AppendFormat("&content={0}", HttpUtility.UrlEncode(value, Encoding.UTF8));
 					break;
-				case MPMessageType.Image:
-				case MPMessageType.Audio:
-				case MPMessageType.Video:
+				case MpMessageType.Image:
+				case MpMessageType.Audio:
+				case MpMessageType.Video:
 					if (string.IsNullOrWhiteSpace(value))
 						throw new ArgumentNullException("value", "文件ID为空");
 
 					postData.AppendFormat("&fileid={0}", value);
 					break;
-				case MPMessageType.AppMsg:
+				case MpMessageType.AppMsg:
 					if (string.IsNullOrWhiteSpace(value))
 						throw new ArgumentNullException("value", "图文消息ID为空");
 
@@ -333,8 +333,8 @@ namespace MPHelper
 					break;
 			}
 
-			var resultJson = await MPRequestUtility.PostAsync(
-				MPAddresses.MassSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
+			var resultJson = await MpRequestUtility.PostAsync(
+				MpAddresses.MassSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
 			return resultPackage != null && resultPackage.ret == 0;
@@ -350,16 +350,16 @@ namespace MPHelper
 			if (!LoginAsync().Result)
 				return null;
 
-			var url = string.Format(MPAddresses.DownloadFileUrlFormat, msgId, LoginContext[_mpAccount].Token);
+			var url = string.Format(MpAddresses.DownloadFileUrlFormat, msgId, LoginContext[_mpAccount].Token);
 
-			return MPRequestUtility.GetDonwloadFileBytes(url, LoginContext[_mpAccount].LoginCookie);
+			return MpRequestUtility.GetDonwloadFileBytes(url, LoginContext[_mpAccount].LoginCookie);
 		}
 
 		#region private
 
 		private async Task<IList<MessageItem>> GetMessageListAsync(string url)
 		{
-			var htmlContent = await MPRequestUtility.GetAsync(url, LoginContext[_mpAccount].LoginCookie);
+			var htmlContent = await MpRequestUtility.GetAsync(url, LoginContext[_mpAccount].LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{

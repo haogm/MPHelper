@@ -2,7 +2,7 @@
 {
 	using Newtonsoft.Json;
 
-	internal class JsonHelper
+	internal static class JsonHelper
 	{
 		public static string Serialize(object obj)
 		{

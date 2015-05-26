@@ -10,12 +10,12 @@ namespace MPHelper.Test
 		const string FakeId = "126185600";
 		const string CategoryId = "0";
 
-		private MPManager _mpManager;
+		private MpManager _mpManager;
 
 		[SetUp]
 		protected void TestSetUp()
 		{
-			_mpManager = new MPManager(MpAccount, MpPasswordMd5);
+			_mpManager = new MpManager(MpAccount, MpPasswordMd5);
 		}
 
 		[Test]
@@ -83,7 +83,7 @@ namespace MPHelper.Test
 			 */
 
 			const string message = "SingleSendMessageTest: test from MPHelper! 中文消息测试！";
-			var success = _mpManager.SingleSendMessageAsync(FakeId, MPMessageType.Text, message).Result;
+			var success = _mpManager.SingleSendMessageAsync(FakeId, MpMessageType.Text, message).Result;
 
 			//var fileId = "10013378";
 			//success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, fileId).Result;

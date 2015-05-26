@@ -1,6 +1,6 @@
 ﻿namespace MPHelper
 {
-	internal static class MPAddresses
+	internal static class MpAddresses
 	{
 		/// <summary>
 		/// 登录

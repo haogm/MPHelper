@@ -3,7 +3,7 @@ using System.Net;
 
 namespace MPHelper
 {
-	internal class MPLoginContext
+	internal class MpLoginContext
 	{
 		const int ExpirationMinutes = 15;
 
