@@ -41,7 +41,7 @@ namespace MPHelper.Utility
 				{
 					using (var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8))
 					{
-						return await streamReader.ReadToEndAsync();
+						return await streamReader.ReadToEndAsync().ConfigureAwait(false);
 					}
 				}
 			}
@@ -74,7 +74,7 @@ namespace MPHelper.Utility
 				{
 					using (var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8))
 					{
-						return await streamReader.ReadToEndAsync();
+						return await streamReader.ReadToEndAsync().ConfigureAwait(false);
 					}
 				}
 			}
