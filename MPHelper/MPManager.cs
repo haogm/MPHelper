@@ -21,15 +21,13 @@ namespace MPHelper
 
 		private readonly string _mpAccount;
 		private readonly string _mpPasswordMd5;
-		private readonly string _mpId;
 
 		/// <summary>
 		/// MPManager
 		/// </summary>
 		/// <param name="mpAccount">公众账号登录用户名</param>
 		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
-		/// <param name="mpId">公众账号Id</param>
-		public MpManager(string mpAccount, string mpPasswordMd5, string mpId = null)
+		public MpManager(string mpAccount, string mpPasswordMd5)
 		{
 			if (string.IsNullOrWhiteSpace(mpAccount))
 				throw new ArgumentNullException("mpAccount");
@@ -39,7 +37,6 @@ namespace MPHelper
 
 			_mpAccount = mpAccount;
 			_mpPasswordMd5 = mpPasswordMd5;
-			_mpId = mpId;
 		}
 
 		/// <summary>
@@ -361,11 +358,12 @@ namespace MPHelper
 		/// <summary>
 		/// 获取图文统计数据
 		/// </summary>
+		/// <param name="mpId"></param>
 		/// <param name="page"></param>
 		/// <param name="from"></param>
 		/// <param name="to"></param>
 		/// <returns></returns>
-		public async Task<StatisticsInfo> GetStatisticsAsync(int page, DateTime from, DateTime to)
+		public async Task<StatisticsInfo> GetStatisticsAsync(string mpId, int page, DateTime from, DateTime to)
 		{
 			if (!await LoginAsync())
 				return null;
@@ -375,7 +373,7 @@ namespace MPHelper
 
 			var statisticsUrl = string.Format(
 				"https://mta.qq.com/mta/wechat/ctr_article_detail/get_list?sort=RefDate%20asc&page={0}&appid={1}&pluginid=luopan&token={2}&src=false&devtype=3&time_type=day&start_date={3}&end_date={4}&need_compare=0&rnd=1439178612710&ajax=1",
-				page, _mpId, LoginContext[_mpAccount].PluginToken, from.ToString("yyyy-MM-dd"), to.ToString("yyyy-MM-dd"));
+				page, mpId, LoginContext[_mpAccount].PluginToken, from.ToString("yyyy-MM-dd"), to.ToString("yyyy-MM-dd"));
 
 			var resultJson = await MpRequestUtility.GetAsync(statisticsUrl, LoginContext[_mpAccount].LoginCookie, "mta.qq.com");
 			var result = JsonHelper.Deserialize<StatisticsInfo>(resultJson);

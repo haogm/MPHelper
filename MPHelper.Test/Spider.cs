@@ -32,7 +32,7 @@ namespace MPHelper.Test
 
 					while (hasMore)
 					{
-						var result = _mpManager.GetStatisticsAsync(page++, from, from.AddMonths(1)).Result;
+						var result = _mpManager.GetStatisticsAsync("wx6b6907213f405fe3", page++, from, from.AddMonths(1)).Result;
 
 						if (result != null)
 						{
