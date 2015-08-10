@@ -368,7 +368,8 @@ namespace MPHelper
 			if (!await LoginAsync())
 				return null;
 
-			if (string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken))
+			if (string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken) 
+				|| LoginContext[_mpAccount].PluginTokenExpiration < DateTime.Now)
 				await FillPluginToken();
 
 			var statisticsUrl = string.Format(
@@ -401,6 +402,7 @@ namespace MPHelper
 					var pluginToken = pluginloginPage.Substring(index + 15, 128);
 
 					LoginContext[_mpAccount].PluginToken = pluginToken;
+					LoginContext[_mpAccount].PluginTokenExpiration = DateTime.Now.AddMinutes(3);
 				}
 			}
 		}

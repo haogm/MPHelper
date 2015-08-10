@@ -20,8 +20,8 @@ namespace MPHelper.Test
 		[Test]
 		public void GetStatisticsTest()
 		{
-			var from = new DateTime(2014, 1, 1);
-			var to = new DateTime(2015, 9, 1);
+			var from = new DateTime(2015, 1, 1);
+			var to = new DateTime(2015, 8, 31);
 
 			using (var streamWriter = new StreamWriter("1.txt", false))
 			{
@@ -32,7 +32,8 @@ namespace MPHelper.Test
 
 					while (hasMore)
 					{
-						var result = _mpManager.GetStatisticsAsync("wx6b6907213f405fe3", page++, from, from.AddMonths(1)).Result;
+						var result = _mpManager.GetStatisticsAsync(
+							"wx6b6907213f405fe3", page++, from, from.AddMonths(1).AddDays(-1)).Result;
 
 						if (result != null)
 						{

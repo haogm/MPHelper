@@ -13,6 +13,8 @@ namespace MPHelper
 
 		public string PluginToken { get; set; }
 
+		public DateTime PluginTokenExpiration { get; set; }
+
 		public DateTime CreateDate { get; set; }
 
 		public bool IsValid()
