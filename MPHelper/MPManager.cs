@@ -21,13 +21,15 @@ namespace MPHelper
 
 		private readonly string _mpAccount;
 		private readonly string _mpPasswordMd5;
+		private readonly string _mpId;
 
 		/// <summary>
 		/// MPManager
 		/// </summary>
 		/// <param name="mpAccount">公众账号登录用户名</param>
 		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
-		public MpManager(string mpAccount, string mpPasswordMd5)
+		/// <param name="mpId">公众账号Id</param>
+		public MpManager(string mpAccount, string mpPasswordMd5, string mpId = null)
 		{
 			if (string.IsNullOrWhiteSpace(mpAccount))
 				throw new ArgumentNullException("mpAccount");
@@ -37,6 +39,7 @@ namespace MPHelper
 
 			_mpAccount = mpAccount;
 			_mpPasswordMd5 = mpPasswordMd5;
+			_mpId = mpId;
 		}
 
 		/// <summary>
@@ -353,6 +356,55 @@ namespace MPHelper
 			var url = string.Format(MpAddresses.DownloadFileUrlFormat, msgId, LoginContext[_mpAccount].Token);
 
 			return MpRequestUtility.GetDonwloadFileBytes(url, LoginContext[_mpAccount].LoginCookie);
+		}
+
+		/// <summary>
+		/// 获取图文统计数据
+		/// </summary>
+		/// <param name="page"></param>
+		/// <param name="from"></param>
+		/// <param name="to"></param>
+		/// <returns></returns>
+		public async Task<StatisticsInfo> GetStatisticsAsync(int page, DateTime from, DateTime to)
+		{
+			if (!await LoginAsync())
+				return null;
+
+			if (string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken))
+				await FillPluginToken();
+
+			var statisticsUrl = string.Format(
+				"https://mta.qq.com/mta/wechat/ctr_article_detail/get_list?sort=RefDate%20asc&page={0}&appid={1}&pluginid=luopan&token={2}&src=false&devtype=3&time_type=day&start_date={3}&end_date={4}&need_compare=0&rnd=1439178612710&ajax=1",
+				page, _mpId, LoginContext[_mpAccount].PluginToken, from.ToString("yyyy-MM-dd"), to.ToString("yyyy-MM-dd"));
+
+			var resultJson = await MpRequestUtility.GetAsync(statisticsUrl, LoginContext[_mpAccount].LoginCookie, "mta.qq.com");
+			var result = JsonHelper.Deserialize<StatisticsInfo>(resultJson);
+
+			return result;
+		}
+
+		private async Task FillPluginToken()
+		{
+			if (!LoginAsync().Result)
+				return;
+
+			var pluginloginUrl = string.Format(
+				"https://mp.weixin.qq.com/misc/pluginloginpage?action=stat_article_detail&pluginid=luopan&t=statistics/index&token={0}&lang=zh_CN",
+				LoginContext[_mpAccount].Token);
+
+			var pluginloginPage = await MpRequestUtility.GetAsync(pluginloginUrl, LoginContext[_mpAccount].LoginCookie);
+
+			if (!string.IsNullOrWhiteSpace(pluginloginPage))
+			{
+				var index = pluginloginPage.IndexOf("pluginToken : '", StringComparison.CurrentCultureIgnoreCase);
+
+				if (index > -1)
+				{
+					var pluginToken = pluginloginPage.Substring(index + 15, 128);
+
+					LoginContext[_mpAccount].PluginToken = pluginToken;
+				}
+			}
 		}
 
 		#region private

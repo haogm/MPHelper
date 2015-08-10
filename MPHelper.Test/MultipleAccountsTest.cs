@@ -1,5 +1,4 @@
-﻿
-namespace MPHelper.Test
+﻿namespace MPHelper.Test
 {
 	using NUnit.Framework;
 

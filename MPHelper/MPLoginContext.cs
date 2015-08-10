@@ -11,6 +11,8 @@ namespace MPHelper
 
 		public CookieContainer LoginCookie { get; set; }
 
+		public string PluginToken { get; set; }
+
 		public DateTime CreateDate { get; set; }
 
 		public bool IsValid()

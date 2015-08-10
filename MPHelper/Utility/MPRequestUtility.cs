@@ -49,7 +49,7 @@ namespace MPHelper.Utility
 			return string.Empty;
 		}
 
-		public static async Task<string> GetAsync(string url, CookieContainer cookie, Encoding encoding = null)
+		public static async Task<string> GetAsync(string url, CookieContainer cookie, string host = "mp.weixin.qq.com", Encoding encoding = null)
 		{
 			var request = (HttpWebRequest) WebRequest.Create(url);
 
@@ -58,7 +58,7 @@ namespace MPHelper.Utility
 			request.ContentType = "application/x-www-form-urlencoded";
 			request.Headers.Add("Accept-Encoding", "gzip,deflate,sdch");
 			request.Headers.Add("Accept-Language", "zh-cn");
-			request.Host = "mp.weixin.qq.com";
+			request.Host = host;
 			request.KeepAlive = true;
 			request.Method = "GET";
 			request.Referer = "https://mp.weixin.qq.com/";
