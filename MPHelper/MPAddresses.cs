@@ -8,6 +8,11 @@
 		public const string LoginUrl = "https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 
 		/// <summary>
+		/// 获取PluginToken
+		/// </summary>
+		public const string PluginTokenUrlFormat = "https://mp.weixin.qq.com/misc/pluginloginpage?action=stat_article_detail&pluginid=luopan&t=statistics/index&token={0}&lang=zh_CN";
+
+		/// <summary>
 		/// 更改用户分组
 		/// </summary>
 		public const string ModifyCategoryUrl = "https://mp.weixin.qq.com/cgi-bin/modifycontacts";

@@ -26,14 +26,13 @@ namespace MPHelper.Utility
 			request.Referer = "https://mp.weixin.qq.com/";
 			request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			//request.Timeout = 5000;
 
 			using (var requestStream = request.GetRequestStream())
 			{
 				requestStream.Write(byteArray, 0, byteArray.Length);
 			}
 
-			using (var response = (HttpWebResponse) request.GetResponse())
+			using (var response = (HttpWebResponse) await request.GetResponseAsync())
 			{
 				var responseStream = response.GetResponseStream();
 
@@ -64,9 +63,8 @@ namespace MPHelper.Utility
 			request.Referer = "https://mp.weixin.qq.com/";
 			request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-			//request.Timeout = 5000;
 
-			using (var response = (HttpWebResponse) request.GetResponse())
+			using (var response = (HttpWebResponse) await request.GetResponseAsync())
 			{
 				var responseStream = response.GetResponseStream();
 
@@ -82,7 +80,7 @@ namespace MPHelper.Utility
 			return string.Empty;
 		}
 
-		public static byte[] GetDonwloadFileBytes(string url, CookieContainer cookie)
+		public async static Task<byte[]> GetDonwloadFileBytesAsync(string url, CookieContainer cookie)
 		{
 			var request = (HttpWebRequest) WebRequest.Create(url);
 
@@ -97,7 +95,7 @@ namespace MPHelper.Utility
 			request.Referer = "https://mp.weixin.qq.com/";
 			request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
 
-			using (var response = (HttpWebResponse) request.GetResponse())
+			using (var response = (HttpWebResponse) await request.GetResponseAsync())
 			{
 				var buffer = new byte[response.ContentLength];
 
@@ -105,7 +103,7 @@ namespace MPHelper.Utility
 
 				if (responseStream != null)
 				{
-					responseStream.Read(buffer, 0, buffer.Length);
+					await responseStream.ReadAsync(buffer, 0, buffer.Length);
 
 					return buffer;
 				}

@@ -5,15 +5,13 @@ namespace MPHelper
 {
 	internal class MpLoginContext
 	{
-		const int ExpirationMinutes = 15;
+		const int ExpirationMinutes = 3;
 
 		public string Token { get; set; }
 
 		public CookieContainer LoginCookie { get; set; }
 
 		public string PluginToken { get; set; }
-
-		public DateTime PluginTokenExpiration { get; set; }
 
 		public DateTime CreateDate { get; set; }
 

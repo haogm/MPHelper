@@ -27,7 +27,8 @@ namespace MPHelper
 		/// </summary>
 		/// <param name="mpAccount">公众账号登录用户名</param>
 		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
-		public MpManager(string mpAccount, string mpPasswordMd5)
+		/// <param name="getPluginToken"></param>
+		public MpManager(string mpAccount, string mpPasswordMd5, bool getPluginToken = false)
 		{
 			if (string.IsNullOrWhiteSpace(mpAccount))
 				throw new ArgumentNullException("mpAccount");
@@ -37,12 +38,14 @@ namespace MPHelper
 
 			_mpAccount = mpAccount;
 			_mpPasswordMd5 = mpPasswordMd5;
+
+			LoginAsync(getPluginToken).Wait();
 		}
 
 		/// <summary>
 		/// 模拟后台登录
 		/// </summary>
-		private async Task<bool> LoginAsync()
+		private async Task<bool> LoginAsync(bool getPluginToken = false)
 		{
 			if (LoginContext.ContainsKey(_mpAccount) && LoginContext[_mpAccount].IsValid())
 				return true;
@@ -74,11 +77,28 @@ namespace MPHelper
 					LoginContext[_mpAccount].LoginCookie = cookie;
 					LoginContext[_mpAccount].CreateDate = DateTime.Now;
 
+					if (getPluginToken)
+						await FillPluginTokenAsync();
+
 					success = true;
 				}
 			}
 
 			return success;
+		}
+
+		private async Task FillPluginTokenAsync()
+		{
+			var pluginloginUrl = string.Format(MpAddresses.PluginTokenUrlFormat, LoginContext[_mpAccount].Token);
+			var pluginloginPage = await MpRequestUtility.GetAsync(pluginloginUrl, LoginContext[_mpAccount].LoginCookie);
+
+			if (!string.IsNullOrWhiteSpace(pluginloginPage))
+			{
+				var index = pluginloginPage.IndexOf("pluginToken : '", StringComparison.CurrentCultureIgnoreCase);
+
+				if (index > -1)
+					LoginContext[_mpAccount].PluginToken = pluginloginPage.Substring(index + 15, 128);
+			}
 		}
 
 		/// <summary>
@@ -290,7 +310,6 @@ namespace MPHelper
 		/// <param name="country">国家</param>
 		/// <param name="province">省</param>
 		/// <param name="city">市</param>
-		/// <returns></returns>
 		public async Task<bool> MassSendMessageAsync(MpMessageType type, string value, string groupId = "-1", int gender = 0,
 			string country = null, string province = null, string city = null)
 		{
@@ -344,15 +363,14 @@ namespace MPHelper
 		/// 获取后台文件（音频、图片）
 		/// </summary>
 		/// <param name="msgId">消息ID</param>
-		/// <returns></returns>
-		public byte[] GetDonwloadFileBytes(int msgId)
+		public async Task<byte[]> GetDonwloadFileBytes(int msgId)
 		{
 			if (!LoginAsync().Result)
 				return null;
 
 			var url = string.Format(MpAddresses.DownloadFileUrlFormat, msgId, LoginContext[_mpAccount].Token);
 
-			return MpRequestUtility.GetDonwloadFileBytes(url, LoginContext[_mpAccount].LoginCookie);
+			return await MpRequestUtility.GetDonwloadFileBytesAsync(url, LoginContext[_mpAccount].LoginCookie);
 		}
 
 		/// <summary>
@@ -362,15 +380,10 @@ namespace MPHelper
 		/// <param name="page"></param>
 		/// <param name="from"></param>
 		/// <param name="to"></param>
-		/// <returns></returns>
 		public async Task<StatisticsInfo> GetStatisticsAsync(string mpId, int page, DateTime from, DateTime to)
 		{
-			if (!await LoginAsync())
+			if (!await LoginAsync(true))
 				return null;
-
-			if (string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken) 
-				|| LoginContext[_mpAccount].PluginTokenExpiration < DateTime.Now)
-				await FillPluginToken();
 
 			var statisticsUrl = string.Format(
 				"https://mta.qq.com/mta/wechat/ctr_article_detail/get_list?sort=RefDate%20asc&page={0}&appid={1}&pluginid=luopan&token={2}&src=false&devtype=3&time_type=day&start_date={3}&end_date={4}&need_compare=0&rnd=1439178612710&ajax=1",
@@ -380,31 +393,6 @@ namespace MPHelper
 			var result = JsonHelper.Deserialize<StatisticsInfo>(resultJson);
 
 			return result;
-		}
-
-		private async Task FillPluginToken()
-		{
-			if (!LoginAsync().Result)
-				return;
-
-			var pluginloginUrl = string.Format(
-				"https://mp.weixin.qq.com/misc/pluginloginpage?action=stat_article_detail&pluginid=luopan&t=statistics/index&token={0}&lang=zh_CN",
-				LoginContext[_mpAccount].Token);
-
-			var pluginloginPage = await MpRequestUtility.GetAsync(pluginloginUrl, LoginContext[_mpAccount].LoginCookie);
-
-			if (!string.IsNullOrWhiteSpace(pluginloginPage))
-			{
-				var index = pluginloginPage.IndexOf("pluginToken : '", StringComparison.CurrentCultureIgnoreCase);
-
-				if (index > -1)
-				{
-					var pluginToken = pluginloginPage.Substring(index + 15, 128);
-
-					LoginContext[_mpAccount].PluginToken = pluginToken;
-					LoginContext[_mpAccount].PluginTokenExpiration = DateTime.Now.AddMinutes(3);
-				}
-			}
 		}
 
 		#region private
