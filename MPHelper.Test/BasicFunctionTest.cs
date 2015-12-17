@@ -6,32 +6,27 @@ namespace MPHelper.Test
 {
 	public class BasicFunctionTest
 	{
-		const string MpAccount = "010227leo@gmail.com";
-		const string MpPasswordMd5 = "498a5846ae15e26c96cffd8e21eb483b";
-		const string FakeId = "ocMl4t4_lBEksXCGmGUqKxda_EwI";
-		const string CategoryId = "0";
-
 		private MpManager _mpManager;
 
 		[SetUp]
 		protected void TestSetUp()
 		{
-			_mpManager = new MpManager(MpAccount, MpPasswordMd5).Preheat();
+			_mpManager = new MpManager(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat();
 		}
 
 		[Test]
 		public void GetContactInfoTest()
 		{
-			var contactInfo = _mpManager.GetContactInfo(FakeId);
+			var contactInfo = _mpManager.GetContactInfo(ConstData.FakeId);
 
 			Assert.NotNull(contactInfo);
-			Assert.AreEqual(FakeId, contactInfo.fake_id);
+			Assert.AreEqual(ConstData.FakeId, contactInfo.fake_id);
 		}
 
 		[Test]
 		public void GetSingleSendMessageListTest()
 		{
-			var messages = _mpManager.GetSingleSendMessageList(FakeId);
+			var messages = _mpManager.GetSingleSendMessageList(ConstData.FakeId);
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Any());
@@ -89,13 +84,13 @@ namespace MPHelper.Test
 
 			const string message = "SingleSendMessageTest: test from MPHelper! 中文消息测试！";
 
-			var success = await _mpManager.SingleSendMessageAsync(FakeId, MpMessageType.Text, message);
+			var success = await _mpManager.SingleSendMessageAsync(ConstData.FakeId, MpMessageType.Text, message);
 
 			//var fileId = "10013378";
-			//success = await _mpManager.SingleSendMessageAsync(FakeId, MpMessageType.Image, fileId);
+			//success = await _mpManager.SingleSendMessageAsync(ConstData.FakeId, MpMessageType.Image, fileId);
 
 			//var appMsgId = "10013374";
-			//success = await _mpManager.SingleSendMessageAsync(FakeId, MpMessageType.AppMsg, appMsgId);
+			//success = await _mpManager.SingleSendMessageAsync(ConstData.FakeId, MpMessageType.AppMsg, appMsgId);
 
 			Assert.IsTrue(success);
 		}
@@ -117,7 +112,7 @@ namespace MPHelper.Test
 		[Test]
 		public async void ChangeCategoryTest()
 		{
-			var success = await _mpManager.ChangeCategoryAsync(FakeId, CategoryId);
+			var success = await _mpManager.ChangeCategoryAsync(ConstData.FakeId, ConstData.CategoryId);
 
 			Assert.IsTrue(success);
 		}

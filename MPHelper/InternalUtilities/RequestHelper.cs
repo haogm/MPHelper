@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Text;
 
@@ -8,6 +9,9 @@ namespace MPHelper.InternalUtilities
 	{
 		public static string Post(string url, string postData, CookieContainer cookie, Encoding encoding = null)
 		{
+#if DEBUG
+			Console.WriteLine("Post:{0}", url);
+#endif
 			var byteArray = Encoding.UTF8.GetBytes(postData);
 			var request = (HttpWebRequest) WebRequest.Create(url);
 
@@ -49,6 +53,9 @@ namespace MPHelper.InternalUtilities
 
 		public static string Get(string url, CookieContainer cookie, string host = "mp.weixin.qq.com", Encoding encoding = null)
 		{
+#if DEBUG
+			Console.WriteLine("Get:{0}", url);
+#endif
 			var request = (HttpWebRequest) WebRequest.Create(url);
 
 			request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";

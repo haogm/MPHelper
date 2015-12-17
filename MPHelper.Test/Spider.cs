@@ -10,23 +10,19 @@ namespace MPHelper.Test
 {
 	public class Spider
 	{
-		const string MpId = "wx6b6907213f405fe3";
-		const string MpAccount = "oerlikonwx@163.com";
-		const string MpPasswordMd5 = "0AF92CED2C0DE88E9780106D2AB4F71B";
-
 		private MpManager _mpManager;
 
 		[SetUp]
 		protected void TestSetUp()
 		{
-			_mpManager = new MpManager(MpAccount, MpPasswordMd5).Preheat(true);
+			_mpManager = new MpManager(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat(true);
 		}
 
 		[Test]
 		public void GetStatisticsTest()
 		{
-			var from = new DateTime(2015, 1, 1);
-			var to = new DateTime(2015, 8, 31);
+			var from = new DateTime(2013, 11, 1);
+			var to = new DateTime(2014, 2, 1);
 
 			var resultList = new List<StatisticsItem>();
 			var actions = new List<Action>();
@@ -59,7 +55,7 @@ namespace MPHelper.Test
 
 			while (hasMore)
 			{
-				var result = _mpManager.GetStatistics(MpId, page++, begin, end);
+				var result = _mpManager.GetStatistics(ConstData.MpId, page++, begin, end);
 
 				if (result == null)
 					break;

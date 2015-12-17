@@ -354,10 +354,7 @@ namespace MPHelper
 		/// <param name="to"></param>
 		public StatisticsInfo GetStatistics(string mpId, int page, DateTime from, DateTime to)
 		{
-			if (!InternalLogin())
-				return null;
-
-			if (string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken) && !InternalFillPluginToken())
+			if (!InternalLogin() || !InternalFillPluginToken())
 				return null;
 
 			var statisticsUrl = string.Format(
@@ -413,22 +410,31 @@ namespace MPHelper
 
 		private bool InternalFillPluginToken()
 		{
-			var pluginloginUrl = string.Format(MpAddresses.PluginTokenUrlFormat, LoginContext[_mpAccount].Token);
-			var pluginloginPage = RequestHelper.Get(pluginloginUrl, LoginContext[_mpAccount].LoginCookie);
+			if (!string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken))
+				return true;
 
-			if (!string.IsNullOrWhiteSpace(pluginloginPage))
+			lock (AccountLockers[_mpAccount])
 			{
-				var index = pluginloginPage.IndexOf("pluginToken : '", StringComparison.CurrentCultureIgnoreCase);
-
-				if (index > -1)
-				{
-					LoginContext[_mpAccount].SetPluginToken(pluginloginPage.Substring(index + 15, 128));
-
+				if (!string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken))
 					return true;
-				}
-			}
 
-			return false;
+				var pluginloginUrl = string.Format(MpAddresses.PluginTokenUrlFormat, LoginContext[_mpAccount].Token);
+				var pluginloginPage = RequestHelper.Get(pluginloginUrl, LoginContext[_mpAccount].LoginCookie);
+
+				if (!string.IsNullOrWhiteSpace(pluginloginPage))
+				{
+					var index = pluginloginPage.IndexOf("pluginToken : '", StringComparison.CurrentCultureIgnoreCase);
+
+					if (index > -1)
+					{
+						LoginContext[_mpAccount].SetPluginToken(pluginloginPage.Substring(index + 15, 128));
+
+						return true;
+					}
+				}
+
+				return false;
+			}
 		}
 
 		private IEnumerable<MessageItem> InternalGetMessageList(string url)
