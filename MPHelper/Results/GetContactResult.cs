@@ -1,4 +1,4 @@
-﻿using MPHelper.DTOs;
+﻿using MPHelper.Dtos;
 
 namespace MPHelper.Results
 {

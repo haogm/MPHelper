@@ -1,4 +1,4 @@
-﻿namespace MPHelper.DTOs
+﻿namespace MPHelper.Dtos
 {
 	/// <summary>
 	/// 联系人对象
@@ -8,7 +8,7 @@
 		/// <summary>
 		/// FakeId
 		/// </summary>
-		public long fake_id { get; set; }
+		public string fake_id { get; set; }
 		
 		/// <summary>
 		/// 昵称

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MPHelper.DTOs
+namespace MPHelper.Dtos
 {
 	public class StatisticsInfo
 	{

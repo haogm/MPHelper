@@ -1,4 +1,4 @@
-﻿namespace MPHelper.DTOs
+﻿namespace MPHelper.Dtos
 {
 	/// <summary>
 	/// 单条消息对象

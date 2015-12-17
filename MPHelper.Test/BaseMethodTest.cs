@@ -7,7 +7,7 @@ namespace MPHelper.Test
 	{
 		const string MpAccount = "010227leo@gmail.com";
 		const string MpPasswordMd5 = "498a5846ae15e26c96cffd8e21eb483b";
-		const string FakeId = "126185600";
+		const string FakeId = "ocMl4t4_lBEksXCGmGUqKxda_EwI";
 		const string CategoryId = "0";
 
 		private MpManager _mpManager;
@@ -21,16 +21,16 @@ namespace MPHelper.Test
 		[Test]
 		public void GetContactInfoTest()
 		{
-			var contactInfo = _mpManager.GetContactInfoAsync(FakeId).Result;
+			var contactInfo = _mpManager.GetContactInfo(FakeId);
 
 			Assert.NotNull(contactInfo);
-			Assert.AreEqual(FakeId, contactInfo.fake_id.ToString());
+			Assert.AreEqual(FakeId, contactInfo.fake_id);
 		}
 
 		[Test]
 		public void GetSingleSendMessageListTest()
 		{
-			var messages = _mpManager.GetSingleSendMessageListAsync(FakeId).Result;
+			var messages = _mpManager.GetSingleSendMessageList(FakeId);
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Any());
@@ -39,7 +39,7 @@ namespace MPHelper.Test
 		[Test]
 		public void GetAllMessageListTest()
 		{
-			var messages = _mpManager.GetAllMessageListAsync(1).Result;
+			var messages = _mpManager.GetAllMessageList(1);
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Any());
@@ -48,7 +48,7 @@ namespace MPHelper.Test
 		[Test]
 		public void GetMessageListByKeywordTest()
 		{
-			var messages = _mpManager.GetMessageListByKeywordAsync("010227").Result;
+			var messages = _mpManager.GetMessageListByKeyword("010227");
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Any());
@@ -57,7 +57,7 @@ namespace MPHelper.Test
 		[Test]
 		public void GetStarMessageListTest()
 		{
-			var messages = _mpManager.GetStarMessageListAsync(1).Result;
+			var messages = _mpManager.GetStarMessageList(1);
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Any());
@@ -67,7 +67,7 @@ namespace MPHelper.Test
 		public void SetStarMessageTest()
 		{
 			var success = false;
-			var messages = _mpManager.GetAllMessageListAsync(1).Result;
+			var messages = _mpManager.GetAllMessageList(1);
 
 			if (messages != null && messages.Any())
 				success = _mpManager.SetStarMessageAsync(messages.First().id.ToString(), true).Result;
@@ -76,44 +76,43 @@ namespace MPHelper.Test
 		}
 
 		[Test]
-		public void SingleSendMessageTest()
+		public async void SingleSendMessageTest()
 		{
 			/*
 			 * 可先给公众账号发送一条消息，确保突破48小时限制。
 			 */
 
 			const string message = "SingleSendMessageTest: test from MPHelper! 中文消息测试！";
-			var success = _mpManager.SingleSendMessageAsync(FakeId, MpMessageType.Text, message).Result;
+
+			var success = await _mpManager.SingleSendMessageAsync(FakeId, MpMessageType.Text, message);
 
 			//var fileId = "10013378";
-			//success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, fileId).Result;
+			//success = await _mpManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.Image, fileId);
 
 			//var appMsgId = "10013374";
-			//success = MPManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.AppMsg, appMsgId).Result;
+			//success = await _mpManager.SingleSendMessageAsync(FAKE_ID, MPMessageType.AppMsg, appMsgId);
 
 			Assert.IsTrue(success);
 		}
 
-		[Test]
-		public void MassSendMessageTest()
-		{
-			/*
-			 * 群发消息受公众账号限制（订阅号一天一条，服务号一个月一条），单元测试慎用。
-			 */
+		//[Test]
+		//public async void MassSendMessageTest()
+		//{
+		//	/*
+		//	 * 群发消息受公众账号限制（订阅号一天一条，服务号一个月一条），单元测试慎用。
+		//	 */
 
-			//var message = "MassSendMessageTest: test from MPHelper! 中文消息测试！";
+		//	const string message = "MassSendMessageTest: test from MPHelper! 中文消息测试！";
 
-			//var success = _MPManager.MassSendMessageAsync(MPMessageType.Text, message).Result;
+		//	var success = await _mpManager.MassSendMessageAsync(MpMessageType.Text, message);
 
-			//Assert.IsTrue(success);
-
-			Assert.Pass();
-		}
+		//	Assert.IsTrue(success);
+		//}
 
 		[Test]
-		public void ChangeCategoryTest()
+		public async void ChangeCategoryTest()
 		{
-			var success = _mpManager.ChangeCategoryAsync(FakeId, CategoryId).Result;
+			var success = await _mpManager.ChangeCategoryAsync(FakeId, CategoryId);
 
 			Assert.IsTrue(success);
 		}

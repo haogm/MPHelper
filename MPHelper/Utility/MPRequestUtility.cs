@@ -1,13 +1,12 @@
 ﻿using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MPHelper.Utility
 {
 	internal static class MpRequestUtility
 	{
-		public static async Task<string> PostAsync(string url, string postData, CookieContainer cookie, Encoding encoding = null)
+		public static string Post(string url, string postData, CookieContainer cookie, Encoding encoding = null)
 		{
 			var byteArray = Encoding.UTF8.GetBytes(postData);
 			var request = (HttpWebRequest) WebRequest.Create(url);
@@ -32,7 +31,7 @@ namespace MPHelper.Utility
 				requestStream.Write(byteArray, 0, byteArray.Length);
 			}
 
-			using (var response = (HttpWebResponse) await request.GetResponseAsync())
+			using (var response = (HttpWebResponse) request.GetResponse())
 			{
 				var responseStream = response.GetResponseStream();
 
@@ -40,7 +39,7 @@ namespace MPHelper.Utility
 				{
 					using (var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8))
 					{
-						return await streamReader.ReadToEndAsync().ConfigureAwait(false);
+						return streamReader.ReadToEnd();
 					}
 				}
 			}
@@ -48,7 +47,7 @@ namespace MPHelper.Utility
 			return string.Empty;
 		}
 
-		public static async Task<string> GetAsync(string url, CookieContainer cookie, string host = "mp.weixin.qq.com", Encoding encoding = null)
+		public static string Get(string url, CookieContainer cookie, string host = "mp.weixin.qq.com", Encoding encoding = null)
 		{
 			var request = (HttpWebRequest) WebRequest.Create(url);
 
@@ -64,7 +63,7 @@ namespace MPHelper.Utility
 			request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
-			using (var response = (HttpWebResponse) await request.GetResponseAsync())
+			using (var response = (HttpWebResponse) request.GetResponse())
 			{
 				var responseStream = response.GetResponseStream();
 
@@ -72,7 +71,7 @@ namespace MPHelper.Utility
 				{
 					using (var streamReader = new StreamReader(responseStream, encoding ?? Encoding.UTF8))
 					{
-						return await streamReader.ReadToEndAsync().ConfigureAwait(false);
+						return streamReader.ReadToEnd();
 					}
 				}
 			}
@@ -80,7 +79,7 @@ namespace MPHelper.Utility
 			return string.Empty;
 		}
 
-		public async static Task<byte[]> GetDonwloadFileBytesAsync(string url, CookieContainer cookie)
+		public static byte[] GetDonwloadFileBytes(string url, CookieContainer cookie)
 		{
 			var request = (HttpWebRequest) WebRequest.Create(url);
 
@@ -95,7 +94,7 @@ namespace MPHelper.Utility
 			request.Referer = "https://mp.weixin.qq.com/";
 			request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36";
 
-			using (var response = (HttpWebResponse) await request.GetResponseAsync())
+			using (var response = (HttpWebResponse) request.GetResponse())
 			{
 				var buffer = new byte[response.ContentLength];
 
@@ -103,7 +102,7 @@ namespace MPHelper.Utility
 
 				if (responseStream != null)
 				{
-					await responseStream.ReadAsync(buffer, 0, buffer.Length);
+					responseStream.Read(buffer, 0, buffer.Length);
 
 					return buffer;
 				}

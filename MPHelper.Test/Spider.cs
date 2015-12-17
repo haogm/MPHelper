@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using MPHelper.DTOs;
+using MPHelper.Dtos;
 using NUnit.Framework;
 
 namespace MPHelper.Test
@@ -38,7 +38,7 @@ namespace MPHelper.Test
 
 				actions.Add(() =>
 				{
-					resultList.AddRange(GetStatistics(begin, end).Result);
+					resultList.AddRange(GetStatistics(begin, end));
 				});
 
 				from = from.AddMonths(1);
@@ -54,7 +54,7 @@ namespace MPHelper.Test
 			}
 		}
 
-		private async Task<IEnumerable<StatisticsItem>> GetStatistics(DateTime begin, DateTime end)
+		private IEnumerable<StatisticsItem> GetStatistics(DateTime begin, DateTime end)
 		{
 			var resultList = new List<StatisticsItem>();
 			var page = 1;
@@ -62,7 +62,7 @@ namespace MPHelper.Test
 
 			while (hasMore)
 			{
-				var result = await _mpManager.GetStatisticsAsync(MpId, page++, begin, end);
+				var result = _mpManager.GetStatistics(MpId, page++, begin, end);
 
 				if (result == null)
 					break;
