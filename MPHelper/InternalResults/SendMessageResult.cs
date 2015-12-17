@@ -1,4 +1,4 @@
-﻿namespace MPHelper.Results
+﻿namespace MPHelper.InternalResults
 {
 	internal class SendMessageResult
 	{

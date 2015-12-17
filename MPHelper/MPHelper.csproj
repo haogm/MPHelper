@@ -52,18 +52,18 @@
     <Compile Include="Dtos\MessageItem.cs" />
     <Compile Include="Dtos\StatisticsInfo.cs" />
     <Compile Include="MpAddresses.cs" />
-    <Compile Include="MpMessageType.cs" />
-    <Compile Include="Results\CommonExecuteResult.cs" />
-    <Compile Include="Results\BaseResp.cs" />
-    <Compile Include="Results\GetContactResult.cs" />
-    <Compile Include="Results\ModifyContactResult.cs" />
+    <Compile Include="Dtos\MpMessageType.cs" />
+    <Compile Include="InternalResults\CommonExecuteResult.cs" />
+    <Compile Include="InternalResults\BaseResp.cs" />
+    <Compile Include="InternalResults\GetContactResult.cs" />
+    <Compile Include="InternalResults\ModifyContactResult.cs" />
     <Compile Include="MpLoginContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Results\LoginResult.cs" />
+    <Compile Include="InternalResults\LoginResult.cs" />
     <Compile Include="MpManager.cs" />
-    <Compile Include="Results\SendMessageResult.cs" />
-    <Compile Include="Utility\JsonHelper.cs" />
-    <Compile Include="Utility\MpRequestUtility.cs" />
+    <Compile Include="InternalResults\SendMessageResult.cs" />
+    <Compile Include="InternalUtilities\JsonHelper.cs" />
+    <Compile Include="InternalUtilities\RequestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MpHelper.nuspec">

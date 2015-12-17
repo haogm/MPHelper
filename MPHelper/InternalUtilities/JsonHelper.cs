@@ -1,7 +1,7 @@
-﻿namespace MPHelper.Utility
-{
-	using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
+namespace MPHelper.InternalUtilities
+{
 	internal static class JsonHelper
 	{
 		public static string Serialize(object obj)

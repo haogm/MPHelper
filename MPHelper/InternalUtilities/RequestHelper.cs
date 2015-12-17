@@ -2,9 +2,9 @@
 using System.Net;
 using System.Text;
 
-namespace MPHelper.Utility
+namespace MPHelper.InternalUtilities
 {
-	internal static class MpRequestUtility
+	internal static class RequestHelper
 	{
 		public static string Post(string url, string postData, CookieContainer cookie, Encoding encoding = null)
 		{

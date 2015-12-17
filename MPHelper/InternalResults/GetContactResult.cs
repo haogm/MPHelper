@@ -1,6 +1,6 @@
 ﻿using MPHelper.Dtos;
 
-namespace MPHelper.Results
+namespace MPHelper.InternalResults
 {
 	internal class GetContactResult
 	{

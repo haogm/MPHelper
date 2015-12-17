@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MPHelper.Results
+namespace MPHelper.InternalResults
 {
 	internal class ModifyContactResult
 	{

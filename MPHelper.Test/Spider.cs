@@ -19,7 +19,7 @@ namespace MPHelper.Test
 		[SetUp]
 		protected void TestSetUp()
 		{
-			_mpManager = new MpManager(MpAccount, MpPasswordMd5, true);
+			_mpManager = new MpManager(MpAccount, MpPasswordMd5).Preheat(true);
 		}
 
 		[Test]
@@ -36,10 +36,7 @@ namespace MPHelper.Test
 				var begin = from;
 				var end = from.AddMonths(1).AddDays(-1);
 
-				actions.Add(() =>
-				{
-					resultList.AddRange(GetStatistics(begin, end));
-				});
+				actions.Add(() => resultList.AddRange(GetStatistics(begin, end)));
 
 				from = from.AddMonths(1);
 			}
