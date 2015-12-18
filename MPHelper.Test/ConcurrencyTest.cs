@@ -12,10 +12,10 @@ namespace MPHelper.Test
 		{
 			Parallel.For(0, 10, _ =>
 			{
-				var mpManager = new MpManager(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat(true);
+				var mpManager = MpManager.GetInstance(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat();
 				var messages = mpManager.GetAllMessageList(3);
 
-				Console.WriteLine("messages:{0}", messages.Count());
+				Console.WriteLine("MpManager HashCode: {0}, Message count: {1}", mpManager.GetHashCode(), messages.Count());
 			});
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -16,20 +17,38 @@ namespace MPHelper
 	/// </summary>
 	public class MpManager
 	{
-		private static readonly object Locker = new object();
-		private static readonly Dictionary<string, object> AccountLockers = new Dictionary<string, object>();
-		private static readonly Dictionary<string, MpLoginContext> LoginContext = new Dictionary<string, MpLoginContext>();
 		private static readonly Regex TokenRegex = new Regex(@"(?:^|\?|&)token=(\d*)(?:&|$)");
+		private static readonly Dictionary<string, MpManager> Instances = new Dictionary<string, MpManager>();
 
+		private readonly object _loginLocker = new object();
 		private readonly string _mpAccount;
 		private readonly string _mpPasswordMd5;
+		private readonly MpLoginContext _loginContext;
+
+		/// <summary>
+		/// Get MPManager Instance
+		/// </summary>
+		/// <param name="mpAccount">公众账号登录用户名</param>
+		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		public static MpManager GetInstance(string mpAccount, string mpPasswordMd5)
+		{
+			if (Instances.ContainsKey(mpAccount))
+				return Instances[mpAccount];
+
+			var instance = new MpManager(mpAccount, mpPasswordMd5);
+
+			Instances.Add(mpAccount, instance);
+
+			return instance;
+		}
 
 		/// <summary>
 		/// MPManager
 		/// </summary>
 		/// <param name="mpAccount">公众账号登录用户名</param>
 		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
-		public MpManager(string mpAccount, string mpPasswordMd5)
+		private MpManager(string mpAccount, string mpPasswordMd5)
 		{
 			if (string.IsNullOrWhiteSpace(mpAccount))
 				throw new ArgumentNullException("mpAccount");
@@ -39,24 +58,15 @@ namespace MPHelper
 
 			_mpAccount = mpAccount;
 			_mpPasswordMd5 = mpPasswordMd5;
-
-			if (AccountLockers.ContainsKey(_mpAccount)) 
-				return;
-
-			lock (Locker)
-			{
-				if (!AccountLockers.ContainsKey(_mpAccount))
-					AccountLockers.Add(_mpAccount, new object());
-			}
+			_loginContext = new MpLoginContext();
 		}
 
 		/// <summary>
 		/// 预热
 		/// </summary>
-		public MpManager Preheat(bool fillPluginToken = false)
+		public MpManager Preheat()
 		{
-			if (InternalLogin() && fillPluginToken)
-				InternalFillPluginToken();
+			InternalLogin();
 
 			return this;
 		}
@@ -78,7 +88,7 @@ namespace MPHelper
 				day = 7;
 
 			var url = string.Format(MpAddresses.AllMessageListUrlFormat,
-				count, day, LoginContext[_mpAccount].Token);
+				count, day, _loginContext.Token);
 
 			return InternalGetMessageList(url);
 		}
@@ -100,7 +110,7 @@ namespace MPHelper
 				count = 20;
 
 			var url = string.Format(MpAddresses.KeywordMessageListUrlFormat,
-				keyword, count, LoginContext[_mpAccount].Token);
+				keyword, count, _loginContext.Token);
 
 			return InternalGetMessageList(url);
 		}
@@ -118,7 +128,7 @@ namespace MPHelper
 				count = 20;
 
 			var url = string.Format(MpAddresses.StarMessageListUrlFormat,
-				count, LoginContext[_mpAccount].Token);
+				count, _loginContext.Token);
 
 			return InternalGetMessageList(url);
 		}
@@ -136,9 +146,9 @@ namespace MPHelper
 					return false;
 
 				var postData = string.Format("msgid={0}&value={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-setstarmessage",
-					messageId, isStar ? "1" : "0", LoginContext[_mpAccount].Token);
+					messageId, isStar ? "1" : "0", _loginContext.Token);
 
-				var resultJson = RequestHelper.Post(MpAddresses.SetStartMessageUrl, postData, LoginContext[_mpAccount].LoginCookie);
+				var resultJson = RequestHelper.Post(MpAddresses.SetStartMessageUrl, postData, _loginContext.LoginCookie);
 				var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
 				return resultPackage != null && resultPackage.ret == 0;
@@ -148,16 +158,16 @@ namespace MPHelper
 		/// <summary>
 		/// 获取单个用户对话消息列表
 		/// </summary>
-		/// <param name="fakeId">用户FakeId</param>
-		public IEnumerable<MessageItem> GetSingleSendMessageList(string fakeId)
+		/// <param name="openId">用户OpenId</param>
+		public IEnumerable<MessageItem> GetSingleSendMessageList(string openId)
 		{
 			if (!InternalLogin())
 				return null;
 
 			var url = string.Format(MpAddresses.SingleSendMessageListUrlFormat,
-				fakeId, LoginContext[_mpAccount].Token);
+				openId, _loginContext.Token);
 
-			var htmlContent = RequestHelper.Get(url, LoginContext[_mpAccount].LoginCookie);
+			var htmlContent = RequestHelper.Get(url, _loginContext.LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{
@@ -174,9 +184,9 @@ namespace MPHelper
 		/// <summary>
 		/// 更改用户分组（0：未分组； 1：黑名单； 2：星标组）
 		/// </summary>
-		/// <param name="fakeId">用户FakeId</param>
+		/// <param name="openId">用户OpenId</param>
 		/// <param name="cateId">分组ID</param>
-		public Task<bool> ChangeCategoryAsync(string fakeId, string cateId)
+		public Task<bool> ChangeCategoryAsync(string openId, string cateId)
 		{
 			return Task.Factory.StartNew(() =>
 			{
@@ -184,9 +194,9 @@ namespace MPHelper
 					return false;
 
 				var postData = string.Format("contacttype={0}&tofakeidlist={1}&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&action=modifycontacts&t=ajax-putinto-group",
-					cateId, fakeId, LoginContext[_mpAccount].Token);
+					cateId, openId, _loginContext.Token);
 
-				var resultJson = RequestHelper.Post(MpAddresses.ModifyCategoryUrl, postData, LoginContext[_mpAccount].LoginCookie);
+				var resultJson = RequestHelper.Post(MpAddresses.ModifyCategoryUrl, postData, _loginContext.LoginCookie);
 				var resultPackage = JsonHelper.Deserialize<ModifyContactResult>(resultJson);
 
 				return resultPackage != null && resultPackage.ret == 0;
@@ -196,16 +206,16 @@ namespace MPHelper
 		/// <summary>
 		/// 获取用户信息
 		/// </summary>
-		/// <param name="fakeId">用户FakeId</param>
-		public ContactInfo GetContactInfo(string fakeId)
+		/// <param name="openId">用户OpenId</param>
+		public ContactInfo GetContactInfo(string openId)
 		{
 			if (!InternalLogin())
 				return null;
 
 			var postData = string.Format("fakeid={0}&token={1}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-getcontactinfo",
-				fakeId, LoginContext[_mpAccount].Token);
+				openId, _loginContext.Token);
 
-			var resultJson = RequestHelper.Post(MpAddresses.GetContactinfoUrl, postData, LoginContext[_mpAccount].LoginCookie);
+			var resultJson = RequestHelper.Post(MpAddresses.GetContactinfoUrl, postData, _loginContext.LoginCookie);
 			var resultPackage = JsonHelper.Deserialize<GetContactResult>(resultJson);
 
 			return resultPackage != null ? resultPackage.contact_info : null;
@@ -214,14 +224,14 @@ namespace MPHelper
 		/// <summary>
 		/// 单用户消息发送
 		/// </summary>
-		/// <param name="fakeId">用户FakeId</param>
+		/// <param name="openId">用户OpenId</param>
 		/// <param name="type">消息类型</param>
 		/// <param name="value">
 		/// 文字消息：文字内容; 
 		/// 图片、音频、视频消息：文件ID; 
 		/// 图文消息：消息ID; 
 		/// </param>
-		public Task<bool> SingleSendMessageAsync(string fakeId, MpMessageType type, string value)
+		public Task<bool> SingleSendMessageAsync(string openId, MpMessageType type, string value)
 		{
 			return Task.Factory.StartNew(() =>
 			{
@@ -231,7 +241,7 @@ namespace MPHelper
 				var postData = new StringBuilder();
 
 				postData.AppendFormat("type={0}&tofakeid={1}&&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
-					(int)type, fakeId, LoginContext[_mpAccount].Token);
+					(int)type, openId, _loginContext.Token);
 
 				switch (type)
 				{
@@ -258,7 +268,7 @@ namespace MPHelper
 				}
 
 				var resultJson = RequestHelper.Post(
-					MpAddresses.SingleSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
+					MpAddresses.SingleSendMessageUrl, postData.ToString(), _loginContext.LoginCookie);
 				var resultPackage = JsonHelper.Deserialize<SendMessageResult>(resultJson);
 
 				return resultPackage != null && resultPackage.base_resp != null && resultPackage.base_resp.ret == 0;
@@ -297,7 +307,7 @@ namespace MPHelper
 					string.IsNullOrWhiteSpace(country) ? string.Empty : HttpUtility.UrlEncode(country, Encoding.UTF8),
 					string.IsNullOrWhiteSpace(province) ? string.Empty : HttpUtility.UrlEncode(province, Encoding.UTF8),
 					string.IsNullOrWhiteSpace(city) ? string.Empty : HttpUtility.UrlEncode(city, Encoding.UTF8),
-					LoginContext[_mpAccount].Token);
+					_loginContext.Token);
 
 				switch (type)
 				{
@@ -324,7 +334,7 @@ namespace MPHelper
 				}
 
 				var resultJson = RequestHelper.Post(
-					MpAddresses.MassSendMessageUrl, postData.ToString(), LoginContext[_mpAccount].LoginCookie);
+					MpAddresses.MassSendMessageUrl, postData.ToString(), _loginContext.LoginCookie);
 				var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
 				return resultPackage != null && resultPackage.ret == 0;
@@ -340,31 +350,9 @@ namespace MPHelper
 			if (!InternalLogin())
 				return null;
 
-			var url = string.Format(MpAddresses.DownloadFileUrlFormat, msgId, LoginContext[_mpAccount].Token);
+			var url = string.Format(MpAddresses.DownloadFileUrlFormat, msgId, _loginContext.Token);
 
-			return RequestHelper.GetDonwloadFileBytes(url, LoginContext[_mpAccount].LoginCookie);
-		}
-
-		/// <summary>
-		/// 获取图文统计数据
-		/// </summary>
-		/// <param name="mpId"></param>
-		/// <param name="page"></param>
-		/// <param name="from"></param>
-		/// <param name="to"></param>
-		public StatisticsInfo GetStatistics(string mpId, int page, DateTime from, DateTime to)
-		{
-			if (!InternalLogin() || !InternalFillPluginToken())
-				return null;
-
-			var statisticsUrl = string.Format(
-				"https://mta.qq.com/mta/wechat/ctr_article_detail/get_list?sort=RefDate%20asc&page={0}&appid={1}&pluginid=luopan&token={2}&src=false&devtype=3&time_type=day&start_date={3}&end_date={4}&need_compare=0&rnd=1439178612710&ajax=1",
-				page, mpId, LoginContext[_mpAccount].PluginToken, from.ToString("yyyy-MM-dd"), to.ToString("yyyy-MM-dd"));
-
-			var resultJson = RequestHelper.Get(statisticsUrl, LoginContext[_mpAccount].LoginCookie, "mta.qq.com");
-			var result = JsonHelper.Deserialize<StatisticsInfo>(resultJson);
-
-			return result;
+			return RequestHelper.GetDonwloadFileBytes(url, _loginContext.LoginCookie);
 		}
 
 		#region private
@@ -374,12 +362,12 @@ namespace MPHelper
 		/// </summary>
 		private bool InternalLogin()
 		{
-			if (LoginContext.ContainsKey(_mpAccount) && LoginContext[_mpAccount].IsValid())
+			if (_loginContext.IsValid())
 				return true;
 
-			lock (AccountLockers[_mpAccount])
+			lock (_loginLocker)
 			{
-				if (LoginContext.ContainsKey(_mpAccount) && LoginContext[_mpAccount].IsValid())
+				if (_loginContext.IsValid())
 					return true;
 
 				var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json",
@@ -395,10 +383,7 @@ namespace MPHelper
 
 					if (tokenMatches.Groups.Count > 1 && !string.IsNullOrWhiteSpace(tokenMatches.Groups[1].Value))
 					{
-						if (!LoginContext.ContainsKey(_mpAccount))
-							LoginContext.Add(_mpAccount, new MpLoginContext());
-
-						LoginContext[_mpAccount].Refresh(tokenMatches.Groups[1].Value, cookie);
+						_loginContext.Refresh(tokenMatches.Groups[1].Value, cookie);
 
 						return true;
 					}
@@ -408,38 +393,9 @@ namespace MPHelper
 			return false;
 		}
 
-		private bool InternalFillPluginToken()
-		{
-			if (!string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken))
-				return true;
-
-			lock (AccountLockers[_mpAccount])
-			{
-				if (!string.IsNullOrWhiteSpace(LoginContext[_mpAccount].PluginToken))
-					return true;
-
-				var pluginloginUrl = string.Format(MpAddresses.PluginTokenUrlFormat, LoginContext[_mpAccount].Token);
-				var pluginloginPage = RequestHelper.Get(pluginloginUrl, LoginContext[_mpAccount].LoginCookie);
-
-				if (!string.IsNullOrWhiteSpace(pluginloginPage))
-				{
-					var index = pluginloginPage.IndexOf("pluginToken : '", StringComparison.CurrentCultureIgnoreCase);
-
-					if (index > -1)
-					{
-						LoginContext[_mpAccount].SetPluginToken(pluginloginPage.Substring(index + 15, 128));
-
-						return true;
-					}
-				}
-
-				return false;
-			}
-		}
-
 		private IEnumerable<MessageItem> InternalGetMessageList(string url)
 		{
-			var htmlContent = RequestHelper.Get(url, LoginContext[_mpAccount].LoginCookie);
+			var htmlContent = RequestHelper.Get(url, _loginContext.LoginCookie);
 
 			if (!string.IsNullOrWhiteSpace(htmlContent))
 			{

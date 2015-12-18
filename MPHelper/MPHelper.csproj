@@ -50,7 +50,6 @@
   <ItemGroup>
     <Compile Include="Dtos\ContactInfo.cs" />
     <Compile Include="Dtos\MessageItem.cs" />
-    <Compile Include="Dtos\StatisticsInfo.cs" />
     <Compile Include="MpAddresses.cs" />
     <Compile Include="Dtos\MpMessageType.cs" />
     <Compile Include="InternalResults\CommonExecuteResult.cs" />

@@ -48,7 +48,6 @@
     <Compile Include="ConcurrencyTest.cs" />
     <Compile Include="ConstData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Spider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MPHelper\MPHelper.csproj">

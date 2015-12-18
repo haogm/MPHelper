@@ -11,22 +11,22 @@ namespace MPHelper.Test
 		[SetUp]
 		protected void TestSetUp()
 		{
-			_mpManager = new MpManager(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat();
+			_mpManager = MpManager.GetInstance(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat();
 		}
 
 		[Test]
 		public void GetContactInfoTest()
 		{
-			var contactInfo = _mpManager.GetContactInfo(ConstData.FakeId);
+			var contactInfo = _mpManager.GetContactInfo(ConstData.OpenId);
 
 			Assert.NotNull(contactInfo);
-			Assert.AreEqual(ConstData.FakeId, contactInfo.fake_id);
+			Assert.AreEqual(ConstData.OpenId, contactInfo.fake_id);
 		}
 
 		[Test]
 		public void GetSingleSendMessageListTest()
 		{
-			var messages = _mpManager.GetSingleSendMessageList(ConstData.FakeId);
+			var messages = _mpManager.GetSingleSendMessageList(ConstData.OpenId);
 
 			Assert.NotNull(messages);
 			Assert.IsTrue(messages.Any());
@@ -84,13 +84,13 @@ namespace MPHelper.Test
 
 			const string message = "SingleSendMessageTest: test from MPHelper! 中文消息测试！";
 
-			var success = await _mpManager.SingleSendMessageAsync(ConstData.FakeId, MpMessageType.Text, message);
+			var success = await _mpManager.SingleSendMessageAsync(ConstData.OpenId, MpMessageType.Text, message);
 
 			//var fileId = "10013378";
-			//success = await _mpManager.SingleSendMessageAsync(ConstData.FakeId, MpMessageType.Image, fileId);
+			//success = await _mpManager.SingleSendMessageAsync(ConstData.OpenId, MpMessageType.Image, fileId);
 
 			//var appMsgId = "10013374";
-			//success = await _mpManager.SingleSendMessageAsync(ConstData.FakeId, MpMessageType.AppMsg, appMsgId);
+			//success = await _mpManager.SingleSendMessageAsync(ConstData.OpenId, MpMessageType.AppMsg, appMsgId);
 
 			Assert.IsTrue(success);
 		}
@@ -112,7 +112,7 @@ namespace MPHelper.Test
 		[Test]
 		public async void ChangeCategoryTest()
 		{
-			var success = await _mpManager.ChangeCategoryAsync(ConstData.FakeId, ConstData.CategoryId);
+			var success = await _mpManager.ChangeCategoryAsync(ConstData.OpenId, ConstData.CategoryId);
 
 			Assert.IsTrue(success);
 		}

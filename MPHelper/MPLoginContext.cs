@@ -5,37 +5,25 @@ namespace MPHelper
 {
 	internal class MpLoginContext
 	{
-		private readonly int _expirationMinutes;
+		private const int ExpiredMinutes = 5;
 		private DateTime _lastRefreshTime = new DateTime(2000, 1, 1);
 
 		public string Token { get; private set; }
 
 		public CookieContainer LoginCookie { get; private set; }
 
-		public string PluginToken { get; private set; }
-
-
-		public MpLoginContext(int expirationMinutes = 3)
-		{
-			_expirationMinutes = expirationMinutes;
-		}
-
 		public void Refresh(string token, CookieContainer cookie)
 		{
 			Token = token;
 			LoginCookie = cookie;
-			PluginToken = string.Empty;
-			_lastRefreshTime = DateTime.Now;
-		}
 
-		public void SetPluginToken(string pluginToken)
-		{
-			PluginToken = pluginToken;
+			_lastRefreshTime = DateTime.Now;
 		}
 
 		public bool IsValid()
 		{
-			return LoginCookie != null && _lastRefreshTime.AddMinutes(_expirationMinutes) > DateTime.Now;
+			return !string.IsNullOrWhiteSpace(Token) && LoginCookie != null
+			       && _lastRefreshTime.AddMinutes(ExpiredMinutes) > DateTime.Now;
 		}
 	}
 }
