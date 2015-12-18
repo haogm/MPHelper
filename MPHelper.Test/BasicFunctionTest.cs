@@ -99,7 +99,7 @@ namespace MPHelper.Test
 		//public async void MassSendMessageTest()
 		//{
 		//	/*
-		//	 * 群发消息受公众账号限制（订阅号一天一条，服务号一个月一条），单元测试慎用。
+		//	 * 群发消息受公众账号限制，单元测试慎用。
 		//	 */
 
 		//	const string message = "MassSendMessageTest: test from MPHelper! 中文消息测试！";
