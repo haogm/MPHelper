@@ -1,4 +1,6 @@
-﻿namespace MPHelper.Dtos
+﻿using Newtonsoft.Json;
+
+namespace MPHelper.Dtos
 {
 	/// <summary>
 	/// 单条消息对象
@@ -8,51 +10,61 @@
 		/// <summary>
 		/// 消息ID
 		/// </summary>
-		public int id { get; set; }
+		[JsonProperty("id")]
+		public int Id { get; set; }
 
 		/// <summary>
 		/// 消息类型
 		/// </summary>
-		public int type { get; set; }
+		[JsonProperty("type")]
+		public int Type { get; set; }
 
 		/// <summary>
 		/// FakeId
 		/// </summary>
-		public string fakeid { get; set; }
+		[JsonProperty("fakeid")]
+		public string FakeId { get; set; }
 
 		/// <summary>
 		/// 昵称
 		/// </summary>
-		public string nick_name { get; set; }
+		[JsonProperty("nick_name")]
+		public string NickName { get; set; }
 
 		/// <summary>
 		/// 发送时间
 		/// </summary>
-		public int date_time { get; set; }
+		[JsonProperty("date_time")]
+		public int DateTime { get; set; }
 
 		/// <summary>
 		/// 内容
 		/// </summary>
-		public string content { get; set; }
+		[JsonProperty("content")]
+		public string Content { get; set; }
 
 		/// <summary>
 		/// 来源
 		/// </summary>
-		public string source { get; set; }
+		[JsonProperty("source")]
+		public string Source { get; set; }
 
 		/// <summary>
 		/// 消息状态
 		/// </summary>
-		public int msg_status { get; set; }
+		[JsonProperty("msg_status")]
+		public int MsgStatus { get; set; }
 
 		/// <summary>
 		/// 是否回复
 		/// </summary>
-		public int has_reply { get; set; }
+		[JsonProperty("has_reply")]
+		public int HasReply { get; set; }
 
 		/// <summary>
 		/// 拒绝原因
 		/// </summary>
-		public string refuse_reason { get; set; }
+		[JsonProperty("refuse_reason")]
+		public string RefuseReason { get; set; }
 	}
 }

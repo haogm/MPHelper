@@ -1,4 +1,6 @@
-﻿namespace MPHelper.Dtos
+﻿using Newtonsoft.Json;
+
+namespace MPHelper.Dtos
 {
 	/// <summary>
 	/// 联系人对象
@@ -8,51 +10,61 @@
 		/// <summary>
 		/// FakeId
 		/// </summary>
-		public string fake_id { get; set; }
+		[JsonProperty("fake_id")]
+		public string FakeId { get; set; }
 		
 		/// <summary>
 		/// 昵称
 		/// </summary>
-		public string nick_name { get; set; }
+		[JsonProperty("nick_name")]
+		public string NickName { get; set; }
 
 		/// <summary>
-		/// 
+		/// 微信号
 		/// </summary>
-		public string user_name { get; set; }
+		[JsonProperty("user_name")]
+		public string UserName { get; set; }
 
 		/// <summary>
 		/// 个人签名
 		/// </summary>
-		public string signature { get; set; }
+		[JsonProperty("signature")]
+		public string Signature { get; set; }
 
 		/// <summary>
 		/// 城市
 		/// </summary>
-		public string city { get; set; }
+		[JsonProperty("city")]
+		public string City { get; set; }
 
 		/// <summary>
 		/// 省
 		/// </summary>
-		public string province { get; set; }
+		[JsonProperty("province")]
+		public string Province { get; set; }
 
 		/// <summary>
 		/// 国家
 		/// </summary>
-		public string country { get; set; }
+		[JsonProperty("country")]
+		public string Country { get; set; }
 
 		/// <summary>
 		/// 性别（1：男； 2：女）
 		/// </summary>
-		public int gender { get; set; }
+		[JsonProperty("gender")]
+		public int Gender { get; set; }
 
 		/// <summary>
 		/// 备注名
 		/// </summary>
-		public string remark_name { get; set; }
+		[JsonProperty("remark_name")]
+		public string RemarkName { get; set; }
 
 		/// <summary>
 		/// 分组Id
 		/// </summary>
-		public int group_id { get; set; }
+		[JsonProperty("group_id")]
+		public int GroupId { get; set; }
 	}
 }

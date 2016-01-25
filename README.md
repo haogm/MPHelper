@@ -20,16 +20,16 @@
 #### 使用
 ```csharp
 //公众账号用户名
-var account = "test@test.com";
+var userName = "test@test.com";
 //公众账号密码MD5值
-var passwordMd5 = "498a5846ae15e26c96cffd8e21eb483b";
+var pwdMd5 = "498a5846ae15e26c96cffd8e21eb483b";
 
-var manager = MpManager.GetInstance(account, passwordMd5);
+var manager = MpManager.GetInstance(userName, pwdMd5);
 
 var openId = "xxxxxxxx";
 //获取用户信息
 var contact = manager.GetContactInfo(openId);
 
 if (contact != null)
-    Console.WriteLine(contact.nick_name);
+    Console.WriteLine(contact.NickName);
 ```

@@ -21,24 +21,24 @@ namespace MPHelper
 		private static readonly Dictionary<string, MpManager> Instances = new Dictionary<string, MpManager>();
 
 		private readonly object _loginLocker = new object();
-		private readonly string _mpAccount;
-		private readonly string _mpPasswordMd5;
+		private readonly string _userName;
+		private readonly string _pwdMd5;
 		private readonly MpLoginContext _loginContext;
 
 		/// <summary>
 		/// Get MPManager Instance
 		/// </summary>
-		/// <param name="mpAccount">公众账号登录用户名</param>
-		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
+		/// <param name="userName">公众账号登录用户名</param>
+		/// <param name="pwdMd5">公众账号登录密码MD5值</param>
 		[MethodImpl(MethodImplOptions.Synchronized)]
-		public static MpManager GetInstance(string mpAccount, string mpPasswordMd5)
+		public static MpManager GetInstance(string userName, string pwdMd5)
 		{
-			if (Instances.ContainsKey(mpAccount))
-				return Instances[mpAccount];
+			if (Instances.ContainsKey(userName))
+				return Instances[userName];
 
-			var instance = new MpManager(mpAccount, mpPasswordMd5);
+			var instance = new MpManager(userName, pwdMd5);
 
-			Instances.Add(mpAccount, instance);
+			Instances.Add(userName, instance);
 
 			return instance;
 		}
@@ -46,18 +46,18 @@ namespace MPHelper
 		/// <summary>
 		/// MPManager
 		/// </summary>
-		/// <param name="mpAccount">公众账号登录用户名</param>
-		/// <param name="mpPasswordMd5">公众账号登录密码MD5值</param>
-		private MpManager(string mpAccount, string mpPasswordMd5)
+		/// <param name="userName">公众账号登录用户名</param>
+		/// <param name="pwdMd5">公众账号登录密码MD5值</param>
+		private MpManager(string userName, string pwdMd5)
 		{
-			if (string.IsNullOrWhiteSpace(mpAccount))
-				throw new ArgumentNullException("mpAccount");
+			if (string.IsNullOrWhiteSpace(userName))
+				throw new ArgumentNullException("userName");
 
-			if (string.IsNullOrWhiteSpace(mpPasswordMd5))
-				throw new ArgumentNullException("mpPasswordMd5");
+			if (string.IsNullOrWhiteSpace(pwdMd5))
+				throw new ArgumentNullException("pwdMd5");
 
-			_mpAccount = mpAccount;
-			_mpPasswordMd5 = mpPasswordMd5;
+			_userName = userName;
+			_pwdMd5 = pwdMd5;
 			_loginContext = new MpLoginContext();
 		}
 
@@ -87,8 +87,7 @@ namespace MPHelper
 			if (day < 0 || day > 7)
 				day = 7;
 
-			var url = string.Format(MpAddresses.AllMessageListUrlFormat,
-				count, day, _loginContext.Token);
+			var url = string.Format(MpAddresses.AllMessageListUrlFormat, count, day, _loginContext.Token);
 
 			return InternalGetMessageList(url);
 		}
@@ -109,8 +108,7 @@ namespace MPHelper
 			if (count < 1 || count > 100)
 				count = 20;
 
-			var url = string.Format(MpAddresses.KeywordMessageListUrlFormat,
-				keyword, count, _loginContext.Token);
+			var url = string.Format(MpAddresses.KeywordMessageListUrlFormat, keyword, count, _loginContext.Token);
 
 			return InternalGetMessageList(url);
 		}
@@ -127,8 +125,7 @@ namespace MPHelper
 			if (count < 1 || count > 100)
 				count = 20;
 
-			var url = string.Format(MpAddresses.StarMessageListUrlFormat,
-				count, _loginContext.Token);
+			var url = string.Format(MpAddresses.StarMessageListUrlFormat, count, _loginContext.Token);
 
 			return InternalGetMessageList(url);
 		}
@@ -267,8 +264,7 @@ namespace MPHelper
 						break;
 				}
 
-				var resultJson = RequestHelper.Post(
-					MpAddresses.SingleSendMessageUrl, postData.ToString(), _loginContext.LoginCookie);
+				var resultJson = RequestHelper.Post(MpAddresses.SingleSendMessageUrl, postData.ToString(), _loginContext.LoginCookie);
 				var resultPackage = JsonHelper.Deserialize<SendMessageResult>(resultJson);
 
 				return resultPackage != null && resultPackage.base_resp != null && resultPackage.base_resp.ret == 0;
@@ -333,8 +329,7 @@ namespace MPHelper
 						break;
 				}
 
-				var resultJson = RequestHelper.Post(
-					MpAddresses.MassSendMessageUrl, postData.ToString(), _loginContext.LoginCookie);
+				var resultJson = RequestHelper.Post(MpAddresses.MassSendMessageUrl, postData.ToString(), _loginContext.LoginCookie);
 				var resultPackage = JsonHelper.Deserialize<CommonExecuteResult>(resultJson);
 
 				return resultPackage != null && resultPackage.ret == 0;
@@ -371,7 +366,7 @@ namespace MPHelper
 					return true;
 
 				var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json",
-					HttpUtility.UrlEncode(_mpAccount), _mpPasswordMd5);
+					HttpUtility.UrlEncode(_userName), _pwdMd5);
 
 				var cookie = new CookieContainer();
 				var resultJson = RequestHelper.Post(MpAddresses.LoginUrl, postData, cookie);

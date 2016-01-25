@@ -12,7 +12,7 @@ namespace MPHelper.Test
 		{
 			Parallel.For(0, 10, _ =>
 			{
-				var mpManager = MpManager.GetInstance(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat();
+				var mpManager = MpManager.GetInstance(ConstData.MpUserName, ConstData.MpPwdMd5).Preheat();
 				var messages = mpManager.GetAllMessageList(3);
 
 				Console.WriteLine("MpManager HashCode: {0}, Message count: {1}", mpManager.GetHashCode(), messages.Count());

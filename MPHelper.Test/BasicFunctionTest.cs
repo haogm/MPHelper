@@ -11,7 +11,7 @@ namespace MPHelper.Test
 		[SetUp]
 		protected void TestSetUp()
 		{
-			_mpManager = MpManager.GetInstance(ConstData.MpAccount, ConstData.MpPasswordMd5).Preheat();
+			_mpManager = MpManager.GetInstance(ConstData.MpUserName, ConstData.MpPwdMd5).Preheat();
 		}
 
 		[Test]
@@ -20,7 +20,7 @@ namespace MPHelper.Test
 			var contactInfo = _mpManager.GetContactInfo(ConstData.OpenId);
 
 			Assert.NotNull(contactInfo);
-			Assert.AreEqual(ConstData.OpenId, contactInfo.fake_id);
+			Assert.AreEqual(ConstData.OpenId, contactInfo.FakeId);
 		}
 
 		[Test]
@@ -70,7 +70,7 @@ namespace MPHelper.Test
 
 			Assert.NotNull(firstMessage);
 
-			var success = await _mpManager.SetStarMessageAsync(firstMessage.id.ToString(), true);
+			var success = await _mpManager.SetStarMessageAsync(firstMessage.Id.ToString(), true);
 
 			Assert.IsTrue(success);
 		}
