@@ -237,8 +237,9 @@ namespace MPHelper
 
 				var postData = new StringBuilder();
 
-				postData.AppendFormat("type={0}&tofakeid={1}&&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
-					(int)type, openId, _loginContext.Token);
+				postData.AppendFormat(
+					"type={0}&tofakeid={1}&&token={2}&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
+					(int) type, openId, _loginContext.Token);
 
 				switch (type)
 				{
@@ -297,7 +298,7 @@ namespace MPHelper
 
 				postData.AppendFormat(
 					"type={0}&groupid={1}&sex={2}&country={3}&province={4}&city={5}&token={6}&synctxweibo=0&synctxnews=0&imgcode=&lang=zh_CN&random=0.1234567890&f=json&ajax=1&t=ajax-response",
-					(int)type,
+					(int) type,
 					string.IsNullOrWhiteSpace(groupId) ? "-1" : groupId,
 					gender,
 					string.IsNullOrWhiteSpace(country) ? string.Empty : HttpUtility.UrlEncode(country, Encoding.UTF8),
@@ -365,9 +366,7 @@ namespace MPHelper
 				if (_loginContext.IsValid())
 					return true;
 
-				var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json",
-					HttpUtility.UrlEncode(_userName), _pwdMd5);
-
+				var postData = string.Format("username={0}&pwd={1}&imgcode=&f=json", HttpUtility.UrlEncode(_userName), _pwdMd5);
 				var cookie = new CookieContainer();
 				var resultJson = RequestHelper.Post(MpAddresses.LoginUrl, postData, cookie);
 				var result = JsonHelper.Deserialize<LoginResult>(resultJson);
